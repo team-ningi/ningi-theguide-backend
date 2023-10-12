@@ -1,0 +1,7 @@
+# NINGI Community Server
+
+# ROUTES
+
+```
+
+```
