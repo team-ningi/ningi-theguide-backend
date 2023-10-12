@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use(errorHandler);
 
 app.get("/", (req, res) => {
-  return res.send("Community API");
+  return res.send("Adviser API");
 });
 
 app.use(userRoutes);
