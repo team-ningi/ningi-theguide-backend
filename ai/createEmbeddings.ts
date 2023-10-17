@@ -17,7 +17,8 @@ export default async (
   file_type: string
 ) => {
   let loader;
-  const streamName = `${document_id}.${file_type}`;
+  const streamName = `/tmp/${document_id}.${file_type}`;
+
   const file = fs.createWriteStream(streamName);
 
   const body = await new Promise((resolve, reject) => {
@@ -35,6 +36,7 @@ export default async (
     });
   });
 
+  //
   if (file_type === "txt") {
     loader = new TextLoader(streamName);
   } else if (file_type === "pdf") {
