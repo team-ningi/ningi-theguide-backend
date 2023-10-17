@@ -24,6 +24,7 @@ exports.default = async (question = "", filePath = "") => {
         return "unsupported file type";
     }
     const docs = await loader.load();
+    // console.log("docs > ", docs);
     const vectorStore = await memory_1.MemoryVectorStore.fromDocuments(docs, new openai_1.OpenAIEmbeddings());
     const searchResponse = await vectorStore.similaritySearch(question, 1);
     const messages = [];
@@ -91,7 +92,6 @@ exports.default = async (question = "", filePath = "") => {
             authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         },
     });
-    // console.log("answer ", data.choices[0].message.content);
     console.log(data.error);
     return data.choices[0].message.content;
 };

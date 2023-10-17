@@ -89,28 +89,29 @@ router.put("/v1/aiadviser/update-document", (0, nocache_1.default)(), (0, helper
         });
     }
 });
-router.post("/v1/aiadviser/create-content", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+router.post("/v1/aiadviser/add-document", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
-        await schemas_1.createContentSchema.validateAsync(req.body);
+        await schemas_1.addDocumentSchema.validateAsync(req.body);
         const newContent = {
-            author: req.body.author,
             user_id: req.body.user_id,
-            title: req.body.title,
-            image_url: req.body.image_url,
-            content: req.body.content,
-            type: req.body.type,
+            label: req.body.label,
+            file_url: req.body.file_url,
+            file_type: req.body.file_type,
+            original_filename: req.body.original_filename,
+            saved_filename: req.body.saved_filename,
+            custom_filename: req.body.custom_filename,
             metadata: req.body.metadata || {},
         };
         await (0, document_creator_1.default)(newContent);
         return res.json({
-            msg: "content added",
+            msg: "document data added",
         });
     }
     catch (e) {
         console.log(e);
         return res.json({
             error: true,
-            msg: "failed to insert content",
+            msg: "failed to insert document data",
         });
     }
 });
