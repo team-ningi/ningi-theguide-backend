@@ -2,7 +2,6 @@ import fs from "fs";
 import OpenAI from "openai";
 
 const openai = new OpenAI();
-// const apiKey = process.env.OPENAI_API_KEY;
 
 const createTranscript = async (filePath = "/audiotest.mp3") => {
   const transcription = await openai.audio.transcriptions.create({

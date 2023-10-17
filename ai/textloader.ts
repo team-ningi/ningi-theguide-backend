@@ -3,7 +3,6 @@ import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
-
 import axios from "axios";
 
 export default async (question = "", filePath = "") => {
@@ -21,6 +20,7 @@ export default async (question = "", filePath = "") => {
   }
 
   const docs = await loader.load();
+  // console.log("docs > ", docs);
 
   const vectorStore = await MemoryVectorStore.fromDocuments(
     docs,
@@ -98,7 +98,6 @@ A human being is a part of the whole called by us universe, a part limited in ti
     },
   });
 
-  // console.log("answer ", data.choices[0].message.content);
   console.log(data.error);
   return data.choices[0].message.content;
 };

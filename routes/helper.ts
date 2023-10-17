@@ -1,4 +1,4 @@
-import { NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import axios from "axios";
 
 export const authTokenVerification = async (token: string) => {
@@ -30,7 +30,7 @@ export const authTokenVerification = async (token: string) => {
 };
 
 export const AuthenticateManageToken =
-  () => async (req: any, res: any, next: NextFunction) => {
+  () => async (req: Request, res: Response, next: NextFunction) => {
     // const authToken = req.get("engageSession");
     // const { valid } = await authTokenVerification(authToken);
 

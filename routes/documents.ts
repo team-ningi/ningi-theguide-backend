@@ -4,7 +4,7 @@ import nocache from "nocache";
 import { documentModel } from "./db/document-model";
 import documentCreator from "./db/document-creator";
 import { AuthenticateManageToken } from "./helper";
-import { idSchema, updateContentSchema, createContentSchema } from "./schemas";
+import { idSchema, updateContentSchema, addDocumentSchema } from "./schemas";
 
 const router = Router();
 
@@ -108,32 +108,33 @@ router.put(
 );
 
 router.post(
-  "/v1/aiadviser/create-content",
+  "/v1/aiadviser/add-document",
   nocache(),
   AuthenticateManageToken(),
   async (req, res) => {
     try {
-      await createContentSchema.validateAsync(req.body);
+      await addDocumentSchema.validateAsync(req.body);
 
       const newContent = {
-        author: req.body.author,
         user_id: req.body.user_id,
-        title: req.body.title,
-        image_url: req.body.image_url,
-        content: req.body.content,
-        type: req.body.type,
+        label: req.body.label,
+        file_url: req.body.file_url,
+        file_type: req.body.file_type,
+        original_filename: req.body.original_filename,
+        saved_filename: req.body.saved_filename,
+        custom_filename: req.body.custom_filename,
         metadata: req.body.metadata || {},
       };
       await documentCreator(newContent);
 
       return res.json({
-        msg: "content added",
+        msg: "document data added",
       });
     } catch (e) {
       console.log(e);
       return res.json({
         error: true,
-        msg: "failed to insert content",
+        msg: "failed to insert document data",
       });
     }
   }
