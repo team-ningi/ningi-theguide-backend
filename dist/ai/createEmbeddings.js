@@ -9,7 +9,7 @@ const fs = require("fs");
 const https = require("https");
 exports.default = async (client, indexName, user_id, document_url, document_id, file_type) => {
     let loader;
-    const streamName = `${document_id}.${file_type}`;
+    const streamName = `/tmp/${document_id}.${file_type}`;
     const file = fs.createWriteStream(streamName);
     const body = await new Promise((resolve, reject) => {
         https.get(document_url, (response) => {
@@ -25,6 +25,7 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
             });
         });
     });
+    //
     if (file_type === "txt") {
         loader = new text_1.TextLoader(streamName);
     }
