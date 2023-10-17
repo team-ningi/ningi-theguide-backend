@@ -11,6 +11,11 @@ export const addDocumentSchema = Joi.object({
   metadata: Joi.object().optional(),
 });
 
+export const resetEmbedFlagSchema = Joi.object({
+  embed_flag: Joi.boolean().required(),
+  document_id: Joi.string().required(),
+});
+
 export const questionSchema = Joi.object({
   question: Joi.string().required(),
   documentIds: Joi.array().optional(),

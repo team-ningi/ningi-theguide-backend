@@ -55,13 +55,13 @@ router.post("/v1/aiadviser/get-individual-document", (0, nocache_1.default)(), (
         });
     }
 });
-router.put("/v1/aiadviser/update-document", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+router.put("/v1/aiadviser/set-embedding-flag", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
-        await schemas_1.updateContentSchema.validateAsync(req.body);
-        const { content_id, title, image_url, content } = req.body;
+        await schemas_1.resetEmbedFlagSchema.validateAsync(req.body);
+        const { embed_flag, document_id } = req.body;
         const data = await document_model_1.documentModel
             .find({
-            _id: content_id,
+            _id: document_id,
         })
             .lean()
             .exec();
@@ -71,10 +71,8 @@ router.put("/v1/aiadviser/update-document", (0, nocache_1.default)(), (0, helper
                 msg: "No document found for the id",
             });
         }
-        const result = await document_model_1.documentModel.findByIdAndUpdate({ _id: content_id }, {
-            title,
-            image_url,
-            content,
+        const result = await document_model_1.documentModel.findByIdAndUpdate({ _id: data[0]?._id }, {
+            emedding_created: embed_flag,
         }, {
             new: true,
             upsert: false,
@@ -85,7 +83,7 @@ router.put("/v1/aiadviser/update-document", (0, nocache_1.default)(), (0, helper
         console.log(e);
         return res.json({
             error: true,
-            msg: "failed to update content",
+            msg: "failed to update embed flag",
         });
     }
 });

@@ -36,7 +36,6 @@ export default async (
     });
   });
 
-  //
   if (file_type === "txt") {
     loader = new TextLoader(streamName);
   } else if (file_type === "pdf") {

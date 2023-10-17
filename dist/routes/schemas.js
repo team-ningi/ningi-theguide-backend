@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.idSchema = exports.questionSchema = exports.addDocumentSchema = void 0;
+exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.idSchema = exports.questionSchema = exports.resetEmbedFlagSchema = exports.addDocumentSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
 exports.addDocumentSchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
@@ -14,6 +14,10 @@ exports.addDocumentSchema = joi_1.default.object({
     original_filename: joi_1.default.string().required(),
     custom_filename: joi_1.default.string().required().allow(""),
     metadata: joi_1.default.object().optional(),
+});
+exports.resetEmbedFlagSchema = joi_1.default.object({
+    embed_flag: joi_1.default.boolean().required(),
+    document_id: joi_1.default.string().required(),
 });
 exports.questionSchema = joi_1.default.object({
     question: joi_1.default.string().required(),

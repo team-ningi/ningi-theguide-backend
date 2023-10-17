@@ -66,26 +66,41 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
     try {
         await schemas_1.createEmbeddingsSchema.validateAsync(req.body);
         const { user_id, document_url, document_id, file_type } = req.body;
-        const client = new pinecone_1.Pinecone({
-            apiKey: process.env.PINECONE_API_KEY,
-            environment: process.env.PINECONE_ENVIRONMENT,
-        });
-        const result = await (0, createEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type);
-        if (!result) {
+        const data = await document_model_1.documentModel
+            .find({
+            _id: document_id,
+            emedding_created: true,
+        })
+            .lean()
+            .exec();
+        if (data.length) {
             return res.json({
                 error: true,
-                msg: "failed to read file",
+                msg: "Embedding created already for this document",
             });
         }
-        await document_model_1.documentModel.findByIdAndUpdate({ _id: document_id }, {
-            emedding_created: true,
-        }, {
-            new: true,
-            upsert: false,
-        });
-        return res.json({
-            msg: "Embedding complete",
-        });
+        else {
+            const client = new pinecone_1.Pinecone({
+                apiKey: process.env.PINECONE_API_KEY,
+                environment: process.env.PINECONE_ENVIRONMENT,
+            });
+            const result = await (0, createEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type);
+            if (!result) {
+                return res.json({
+                    error: true,
+                    msg: "failed to read file",
+                });
+            }
+            await document_model_1.documentModel.findOneAndUpdate({ _id: document_id }, {
+                emedding_created: true,
+            }, {
+                new: true,
+                upsert: false,
+            });
+            return res.json({
+                msg: "Embedding complete",
+            });
+        }
     }
     catch (e) {
         console.log(e);

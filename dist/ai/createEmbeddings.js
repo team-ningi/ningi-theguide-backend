@@ -25,7 +25,6 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
             });
         });
     });
-    //
     if (file_type === "txt") {
         loader = new text_1.TextLoader(streamName);
     }

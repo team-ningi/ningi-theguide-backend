@@ -4,7 +4,7 @@ import nocache from "nocache";
 import { documentModel } from "./db/document-model";
 import documentCreator from "./db/document-creator";
 import { AuthenticateManageToken } from "./helper";
-import { idSchema, updateContentSchema, addDocumentSchema } from "./schemas";
+import { idSchema, resetEmbedFlagSchema, addDocumentSchema } from "./schemas";
 
 const router = Router();
 
@@ -62,18 +62,18 @@ router.post(
 );
 
 router.put(
-  "/v1/aiadviser/update-document",
+  "/v1/aiadviser/set-embedding-flag",
   nocache(),
   AuthenticateManageToken(),
   async (req, res) => {
     try {
-      await updateContentSchema.validateAsync(req.body);
+      await resetEmbedFlagSchema.validateAsync(req.body);
 
-      const { content_id, title, image_url, content } = req.body;
+      const { embed_flag, document_id } = req.body;
 
       const data = await documentModel
         .find({
-          _id: content_id,
+          _id: document_id,
         })
         .lean()
         .exec();
@@ -84,12 +84,11 @@ router.put(
           msg: "No document found for the id",
         });
       }
+
       const result = await documentModel.findByIdAndUpdate(
-        { _id: content_id },
+        { _id: data[0]?._id },
         {
-          title,
-          image_url,
-          content,
+          emedding_created: embed_flag,
         },
         {
           new: true,
@@ -101,7 +100,7 @@ router.put(
       console.log(e);
       return res.json({
         error: true,
-        msg: "failed to update content",
+        msg: "failed to update embed flag",
       });
     }
   }

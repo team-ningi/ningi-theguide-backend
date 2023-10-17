@@ -98,41 +98,56 @@ router.post(
       await createEmbeddingsSchema.validateAsync(req.body);
       const { user_id, document_url, document_id, file_type } = req.body;
 
-      const client = new Pinecone({
-        apiKey: process.env.PINECONE_API_KEY,
-        environment: process.env.PINECONE_ENVIRONMENT,
-      });
+      const data = await documentModel
+        .find({
+          _id: document_id,
+          emedding_created: true,
+        })
+        .lean()
+        .exec();
 
-      const result = await createEmbeddings(
-        client,
-        process.env.PINECONE_INDEX_NAME,
-        user_id,
-        document_url,
-        document_id,
-        file_type
-      );
-
-      if (!result) {
+      if (data.length) {
         return res.json({
           error: true,
-          msg: "failed to read file",
+          msg: "Embedding created already for this document",
+        });
+      } else {
+        const client = new Pinecone({
+          apiKey: process.env.PINECONE_API_KEY,
+          environment: process.env.PINECONE_ENVIRONMENT,
+        });
+
+        const result = await createEmbeddings(
+          client,
+          process.env.PINECONE_INDEX_NAME,
+          user_id,
+          document_url,
+          document_id,
+          file_type
+        );
+
+        if (!result) {
+          return res.json({
+            error: true,
+            msg: "failed to read file",
+          });
+        }
+
+        await documentModel.findOneAndUpdate(
+          { _id: document_id },
+          {
+            emedding_created: true,
+          },
+          {
+            new: true,
+            upsert: false,
+          }
+        );
+
+        return res.json({
+          msg: "Embedding complete",
         });
       }
-
-      await documentModel.findByIdAndUpdate(
-        { _id: document_id },
-        {
-          emedding_created: true,
-        },
-        {
-          new: true,
-          upsert: false,
-        }
-      );
-
-      return res.json({
-        msg: "Embedding complete",
-      });
     } catch (e) {
       console.log(e);
       return res.json({
