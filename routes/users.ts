@@ -153,10 +153,10 @@ router.post(
       const newUser = {
         email: req.body.email_address,
       };
-      await usersCreator(newUser);
-
+      const user = await usersCreator(newUser);
       return res.json({
         error: false,
+        user,
         msg: "user added",
       });
     } catch (e) {

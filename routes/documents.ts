@@ -124,9 +124,11 @@ router.post(
         custom_filename: req.body.custom_filename,
         metadata: req.body.metadata || {},
       };
-      await documentCreator(newContent);
+      const document = await documentCreator(newContent);
 
       return res.json({
+        error: false,
+        document,
         msg: "document data added",
       });
     } catch (e) {
@@ -135,6 +137,28 @@ router.post(
         error: true,
         msg: "failed to insert document data",
       });
+    }
+  }
+);
+
+router.delete(
+  "/v1/aiadviser/delete-document",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await idSchema.validateAsync(req.body);
+
+      const id = req.body.id;
+      const result = await documentModel.findOneAndRemove({
+        _id: id,
+      });
+      result
+        ? res.json({ msg: `Document ${id} has been deleted` })
+        : res.json({ msg: `Document ${id} was not found` });
+    } catch (e) {
+      console.log(e);
+      res.send({ error: e });
     }
   }
 );
