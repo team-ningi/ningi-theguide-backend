@@ -31,17 +31,19 @@ export const authTokenVerification = async (token: string) => {
 
 export const AuthenticateManageToken =
   () => async (req: Request, res: Response, next: NextFunction) => {
-    // const authToken = req.get("engageSession");
-    // const { valid } = await authTokenVerification(authToken);
+    if (process.env.TEST_FLAG_ON) {
+      return next();
+    }
 
-    // if (valid) {
-    //   return next();
-    // } else {
-    //   return res.send({
-    //     status: 403,
-    //     msg: "you are not allowed to perform this action",
-    //   });
-    // }
+    const authToken = req.get("engageSession") || "";
+    const { valid } = await authTokenVerification(authToken);
 
-    return next();
+    if (valid) {
+      return next();
+    } else {
+      return res.send({
+        status: 403,
+        msg: "you are not allowed to perform this action",
+      });
+    }
   };
