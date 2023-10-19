@@ -1,5 +1,11 @@
 import Joi from "joi";
 
+export const addHistorySchema = Joi.object({
+  user_id: Joi.string().required(),
+  history: Joi.array().required(),
+  metadata: Joi.object().optional(),
+});
+
 export const addDocumentSchema = Joi.object({
   user_id: Joi.string().required(),
   label: Joi.string().required().allow(""),
@@ -23,6 +29,10 @@ export const questionSchema = Joi.object({
 
 export const idSchema = Joi.object({
   id: Joi.string().required(),
+});
+
+export const userIdSchema = Joi.object({
+  user_id: Joi.string().required(),
 });
 
 export const createIndexSchema = Joi.object({
@@ -56,5 +66,11 @@ export const updateUserSchema = Joi.object({
   address_line4: Joi.string().optional(),
   role: Joi.string().optional(),
   company: Joi.string().optional(),
+  metadata: Joi.object().optional(),
+});
+
+export const updateHistorySchema = Joi.object({
+  user_id: Joi.string().required(),
+  history: Joi.array().required(),
   metadata: Joi.object().optional(),
 });
