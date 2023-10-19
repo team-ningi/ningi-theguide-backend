@@ -31,7 +31,12 @@ export const authTokenVerification = async (token: string) => {
 
 export const AuthenticateManageToken =
   () => async (req: Request, res: Response, next: NextFunction) => {
-    if (process.env.TEST_FLAG_ON) {
+    const APPLICATION_TOKEN = req.get("Authorization") || "";
+
+    if (
+      process.env.TEST_FLAG_ON ||
+      APPLICATION_TOKEN === process.env.TEST_APPLICATION_TOKEN
+    ) {
       return next();
     }
 
