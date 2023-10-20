@@ -4,34 +4,75 @@ import nocache from "nocache";
 import { documentModel } from "./db/document-model";
 import documentCreator from "./db/document-creator";
 import { AuthenticateManageToken } from "./helper";
-import { idSchema, resetEmbedFlagSchema, addDocumentSchema } from "./schemas";
+import {
+  idSchema,
+  userIdSchema,
+  resetEmbedFlagSchema,
+  addDocumentSchema,
+} from "./schemas";
 
 const router = Router();
 
-router.get("/v1/aiadviser/get-documents", nocache(), async (req, res) => {
-  try {
-    const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
-    const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
-    const searchType = req.query.type ? { type: req.query.type } : {};
+router.get(
+  "/v1/aiadviser/get-all-documents",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
+      const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
+      const searchType = req.query.type ? { type: req.query.type } : {};
 
-    const result = await documentModel
-      .find(searchType)
-      .lean()
-      .skip(skip)
-      .limit(limit)
-      .sort({ $natural: -1 })
-      .exec();
+      const result = await documentModel
+        .find(searchType)
+        .lean()
+        .skip(skip)
+        .limit(limit)
+        .sort({ $natural: -1 })
+        .exec();
 
-    res.json([...result]);
-  } catch (e) {
-    console.log(e);
-    res.send({
-      status: "error",
-      error: e,
-      msg: "we were unable to GET documents",
-    });
+      res.json([...result]);
+    } catch (e) {
+      console.log(e);
+      res.send({
+        status: "error",
+        error: e,
+        msg: "we were unable to GET documents",
+      });
+    }
   }
-});
+);
+
+router.post(
+  "/v1/aiadviser/get-documents-by-userid",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await userIdSchema.validateAsync(req.body);
+      const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
+      const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
+
+      const { user_id } = req.body;
+      const result = await documentModel
+        .find({ user_id })
+        .lean()
+        .skip(skip)
+        .limit(limit)
+        .sort({ $natural: -1 })
+        .exec();
+
+      result ? res.json([result]) : res.json([]);
+    } catch (e) {
+      console.log(e);
+      res.send({
+        status: "error",
+        error: e,
+        msg: "we were unable to GET the users documents",
+      });
+    }
+  }
+);
 
 router.post(
   "/v1/aiadviser/get-individual-document",
