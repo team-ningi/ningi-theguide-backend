@@ -53,7 +53,7 @@ router.post(
         .lean()
         .exec();
 
-      result ? res.json([result]) : res.json([]);
+      result ? res.json(result) : res.json([]);
     } catch (e) {
       console.log(e);
       res.send({

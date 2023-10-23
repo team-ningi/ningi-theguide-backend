@@ -13,33 +13,38 @@ import {
 
 const router = Router();
 
-router.get("/v1/aiadviser/get-history", nocache(), async (req, res) => {
-  try {
-    const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
-    const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
-    const searchType = req.query.type ? { type: req.query.type } : {};
+router.get(
+  "/v1/aiadviser/get-all-history",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
+      const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
+      const searchType = req.query.type ? { type: req.query.type } : {};
 
-    const result = await chatHistoryModel
-      .find(searchType)
-      .lean()
-      .skip(skip)
-      .limit(limit)
-      .sort({ $natural: -1 })
-      .exec();
+      const result = await chatHistoryModel
+        .find(searchType)
+        .lean()
+        .skip(skip)
+        .limit(limit)
+        .sort({ $natural: -1 })
+        .exec();
 
-    res.json([...result]);
-  } catch (e) {
-    console.log(e);
-    res.send({
-      status: "error",
-      error: e,
-      msg: "we were unable to GET history",
-    });
+      res.json([...result]);
+    } catch (e) {
+      console.log(e);
+      res.send({
+        status: "error",
+        error: e,
+        msg: "we were unable to GET history",
+      });
+    }
   }
-});
+);
 
 router.post(
-  "/v1/aiadviser/get-individual-history",
+  "/v1/aiadviser/get-users-history",
   nocache(),
   AuthenticateManageToken(),
   async (req, res) => {
@@ -54,13 +59,13 @@ router.post(
         .lean()
         .exec();
 
-      result ? res.json([result]) : res.json([]);
+      result ? res.json(result) : res.json([]);
     } catch (e) {
       console.log(e);
       res.send({
         status: "error",
         error: e,
-        msg: "we were unable to GET individual history",
+        msg: "we were unable to GET users history",
       });
     }
   }
@@ -102,6 +107,7 @@ router.put(
   AuthenticateManageToken(),
   async (req, res) => {
     try {
+      console.log("HELLLOOO");
       await updateHistorySchema.validateAsync(req.body);
 
       const { user_id, history, metadata = {} } = req.body;

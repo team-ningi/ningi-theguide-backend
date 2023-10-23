@@ -6,7 +6,7 @@ import documentCreator from "./db/document-creator";
 import { AuthenticateManageToken } from "./helper";
 import {
   idSchema,
-  userIdSchema,
+  getDocsSchema,
   resetEmbedFlagSchema,
   addDocumentSchema,
 } from "./schemas";
@@ -49,20 +49,22 @@ router.post(
   AuthenticateManageToken(),
   async (req, res) => {
     try {
-      await userIdSchema.validateAsync(req.body);
+      await getDocsSchema.validateAsync(req.body);
       const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
       const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
+      const { user_id, embedded } = req.body;
+      const searchEmbedded =
+        embedded !== "all" ? { emedding_created: embedded } : {}; // "all" | true | false
 
-      const { user_id } = req.body;
       const result = await documentModel
-        .find({ user_id })
+        .find({ user_id, ...searchEmbedded })
         .lean()
         .skip(skip)
         .limit(limit)
         .sort({ $natural: -1 })
         .exec();
 
-      result ? res.json([result]) : res.json([]);
+      result ? res.json(result) : res.json([]);
     } catch (e) {
       console.log(e);
       res.send({

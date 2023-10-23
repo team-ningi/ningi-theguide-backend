@@ -35,6 +35,11 @@ export const userIdSchema = Joi.object({
   user_id: Joi.string().required(),
 });
 
+export const getDocsSchema = Joi.object({
+  user_id: Joi.string().required(),
+  embedded: Joi.any().required(),
+});
+
 export const createIndexSchema = Joi.object({
   index_name: Joi.string().required(),
   vector_dimension: Joi.number().required(),
