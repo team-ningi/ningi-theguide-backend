@@ -107,7 +107,6 @@ router.put(
   AuthenticateManageToken(),
   async (req, res) => {
     try {
-      console.log("HELLLOOO");
       await updateHistorySchema.validateAsync(req.body);
 
       const { user_id, history, metadata = {} } = req.body;
