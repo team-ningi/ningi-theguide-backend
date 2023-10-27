@@ -1,7 +1,9 @@
 import "dotenv/config";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { TextLoader } from "langchain/document_loaders/fs/text";
+import { DocxLoader } from "langchain/document_loaders/fs/docx";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import axios from "axios";
 
@@ -9,7 +11,9 @@ export default async (question = "", filePath = "") => {
   const fileExtension = filePath.split(".").pop();
   let loader;
 
-  if (fileExtension === "txt") {
+  if (fileExtension === "docx") {
+    loader = new DocxLoader(filePath);
+  } else if (fileExtension === "txt") {
     loader = new TextLoader(filePath);
   } else if (fileExtension === "pdf") {
     loader = new PDFLoader(filePath, {

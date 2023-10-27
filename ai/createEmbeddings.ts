@@ -3,6 +3,7 @@ import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { TextLoader } from "langchain/document_loaders/fs/text";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
+import { DocxLoader } from "langchain/document_loaders/fs/docx";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { Errback, Response } from "express";
 const fs = require("fs");
@@ -36,7 +37,9 @@ export default async (
     });
   });
 
-  if (file_type === "txt") {
+  if (file_type === "docx") {
+    loader = new DocxLoader(streamName);
+  } else if (file_type === "txt") {
     loader = new TextLoader(streamName);
   } else if (file_type === "pdf") {
     loader = new PDFLoader(streamName, {
