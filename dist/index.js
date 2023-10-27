@@ -13,6 +13,7 @@ const cors_1 = __importDefault(require("cors"));
 const users_1 = __importDefault(require("./routes/users"));
 const documents_1 = __importDefault(require("./routes/documents"));
 const ai_1 = __importDefault(require("./routes/ai"));
+const history_1 = __importDefault(require("./routes/history"));
 dotenv_1.default.config();
 require("./setup").setup();
 const app = (0, express_1.default)();
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
 app.use(users_1.default);
 app.use(documents_1.default);
 app.use(ai_1.default);
+app.use(history_1.default);
 app.listen(port, () => {
     console.log(`Listening on port: ${port}`);
 });

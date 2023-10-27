@@ -3,8 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.idSchema = exports.questionSchema = exports.resetEmbedFlagSchema = exports.addDocumentSchema = void 0;
+exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.questionSchema = exports.resetEmbedFlagSchema = exports.addDocumentSchema = exports.addHistorySchema = void 0;
 const joi_1 = __importDefault(require("joi"));
+exports.addHistorySchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    history: joi_1.default.array().required(),
+    metadata: joi_1.default.object().optional(),
+});
 exports.addDocumentSchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
     label: joi_1.default.string().required().allow(""),
@@ -25,6 +30,13 @@ exports.questionSchema = joi_1.default.object({
 });
 exports.idSchema = joi_1.default.object({
     id: joi_1.default.string().required(),
+});
+exports.userIdSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+});
+exports.getDocsSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    embedded: joi_1.default.any().required(),
 });
 exports.createIndexSchema = joi_1.default.object({
     index_name: joi_1.default.string().required(),
@@ -53,5 +65,10 @@ exports.updateUserSchema = joi_1.default.object({
     address_line4: joi_1.default.string().optional(),
     role: joi_1.default.string().optional(),
     company: joi_1.default.string().optional(),
+    metadata: joi_1.default.object().optional(),
+});
+exports.updateHistorySchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    history: joi_1.default.array().required(),
     metadata: joi_1.default.object().optional(),
 });

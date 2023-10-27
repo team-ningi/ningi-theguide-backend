@@ -101,7 +101,7 @@ router.post(
       const data = await documentModel
         .find({
           _id: document_id,
-          emedding_created: true,
+          embedding_created: true,
         })
         .lean()
         .exec();
@@ -136,7 +136,7 @@ router.post(
         await documentModel.findOneAndUpdate(
           { _id: document_id },
           {
-            emedding_created: true,
+            embedding_created: true,
           },
           {
             new: true,

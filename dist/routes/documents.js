@@ -11,7 +11,7 @@ const document_creator_1 = __importDefault(require("./db/document-creator"));
 const helper_1 = require("./helper");
 const schemas_1 = require("./schemas");
 const router = (0, express_1.Router)();
-router.get("/v1/aiadviser/get-documents", (0, nocache_1.default)(), async (req, res) => {
+router.get("/v1/aiadviser/get-all-documents", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
         const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
         const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
@@ -31,6 +31,31 @@ router.get("/v1/aiadviser/get-documents", (0, nocache_1.default)(), async (req, 
             status: "error",
             error: e,
             msg: "we were unable to GET documents",
+        });
+    }
+});
+router.post("/v1/aiadviser/get-documents-by-userid", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.getDocsSchema.validateAsync(req.body);
+        const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
+        const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
+        const { user_id, embedded } = req.body;
+        const searchEmbedded = embedded !== "all" ? { embedding_created: embedded } : {}; // "all" | true | false
+        const result = await document_model_1.documentModel
+            .find({ user_id, ...searchEmbedded })
+            .lean()
+            .skip(skip)
+            .limit(limit)
+            .sort({ $natural: -1 })
+            .exec();
+        result ? res.json(result) : res.json([]);
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            status: "error",
+            error: e,
+            msg: "we were unable to GET the users documents",
         });
     }
 });
@@ -72,7 +97,7 @@ router.put("/v1/aiadviser/set-embedding-flag", (0, nocache_1.default)(), (0, hel
             });
         }
         const result = await document_model_1.documentModel.findByIdAndUpdate({ _id: data[0]?._id }, {
-            emedding_created: embed_flag,
+            embedding_created: embed_flag,
         }, {
             new: true,
             upsert: false,
@@ -100,8 +125,10 @@ router.post("/v1/aiadviser/add-document", (0, nocache_1.default)(), (0, helper_1
             custom_filename: req.body.custom_filename,
             metadata: req.body.metadata || {},
         };
-        await (0, document_creator_1.default)(newContent);
+        const document = await (0, document_creator_1.default)(newContent);
         return res.json({
+            error: false,
+            document,
             msg: "document data added",
         });
     }
@@ -111,6 +138,22 @@ router.post("/v1/aiadviser/add-document", (0, nocache_1.default)(), (0, helper_1
             error: true,
             msg: "failed to insert document data",
         });
+    }
+});
+router.delete("/v1/aiadviser/delete-document", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.idSchema.validateAsync(req.body);
+        const id = req.body.id;
+        const result = await document_model_1.documentModel.findOneAndRemove({
+            _id: id,
+        });
+        result
+            ? res.json({ msg: `Document ${id} has been deleted` })
+            : res.json({ msg: `Document ${id} was not found` });
+    }
+    catch (e) {
+        console.log(e);
+        res.send({ error: e });
     }
 });
 exports.default = router;

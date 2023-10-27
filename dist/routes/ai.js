@@ -69,7 +69,7 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
         const data = await document_model_1.documentModel
             .find({
             _id: document_id,
-            emedding_created: true,
+            embedding_created: true,
         })
             .lean()
             .exec();
@@ -92,7 +92,7 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
                 });
             }
             await document_model_1.documentModel.findOneAndUpdate({ _id: document_id }, {
-                emedding_created: true,
+                embedding_created: true,
             }, {
                 new: true,
                 upsert: false,

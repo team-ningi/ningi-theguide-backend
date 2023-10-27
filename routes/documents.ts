@@ -54,7 +54,7 @@ router.post(
       const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
       const { user_id, embedded } = req.body;
       const searchEmbedded =
-        embedded !== "all" ? { emedding_created: embedded } : {}; // "all" | true | false
+        embedded !== "all" ? { embedding_created: embedded } : {}; // "all" | true | false
 
       const result = await documentModel
         .find({ user_id, ...searchEmbedded })
@@ -131,7 +131,7 @@ router.put(
       const result = await documentModel.findByIdAndUpdate(
         { _id: data[0]?._id },
         {
-          emedding_created: embed_flag,
+          embedding_created: embed_flag,
         },
         {
           new: true,

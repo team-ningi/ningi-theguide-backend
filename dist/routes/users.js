@@ -43,7 +43,7 @@ router.post("/v1/aiadviser/get-individual-user", (0, nocache_1.default)(), (0, h
         })
             .lean()
             .exec();
-        result ? res.json([result]) : res.json([]);
+        result ? res.json(result) : res.json([]);
     }
     catch (e) {
         console.log(e);
@@ -112,9 +112,10 @@ router.post("/v1/aiadviser/create-user", (0, nocache_1.default)(), (0, helper_1.
         const newUser = {
             email: req.body.email_address,
         };
-        await (0, users_creator_1.default)(newUser);
+        const user = await (0, users_creator_1.default)(newUser);
         return res.json({
             error: false,
+            user,
             msg: "user added",
         });
     }

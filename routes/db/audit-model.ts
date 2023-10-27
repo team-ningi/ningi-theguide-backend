@@ -7,7 +7,6 @@ mongoose.Promise = Promise;
 const auditSchema = new mongoose.Schema(
   {
     user_id: { type: String, index: true },
-    path: { type: String, index: true },
     action: { type: String, index: true },
     metadata: { type: mongoose.SchemaTypes.Mixed },
     created_at: { type: Date },

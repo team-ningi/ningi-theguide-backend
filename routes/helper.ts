@@ -1,4 +1,5 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express"; //@ts-ignore
+import auditCreator from "./db/audit-creator";
 import axios from "axios";
 
 export const authTokenVerification = async (token: string) => {
@@ -52,3 +53,24 @@ export const AuthenticateManageToken =
       });
     }
   };
+
+export const addToAudit = async (
+  req: Request,
+  auditData: {
+    user_id: string;
+    path: string;
+    action: string;
+    metadata: object;
+  }
+) => {
+  try {
+    const applicationToken = req.get("Authorization") || "";
+    const authToken = req.get("engageSession") || "";
+    const { user_id, path, action } = auditData;
+    const metadata = { ...auditData?.metadata, authToken, applicationToken };
+
+    auditCreator({ user_id, path, action, metadata });
+  } catch (e) {
+    // swallow
+  }
+};

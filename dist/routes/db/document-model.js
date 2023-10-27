@@ -10,7 +10,7 @@ const documentSchema = new mongoose.Schema({
     original_filename: { type: String, index: true },
     saved_filename: { type: String, index: true },
     custom_filename: { type: String, index: true },
-    emedding_created: { type: Boolean, default: false },
+    embedding_created: { type: Boolean, default: false },
     metadata: { type: mongoose.SchemaTypes.Mixed },
     created_at: { type: Date },
     updated_at: { type: Date },
