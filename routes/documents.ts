@@ -9,6 +9,7 @@ import {
   getDocsSchema,
   resetEmbedFlagSchema,
   addDocumentSchema,
+  searchDocsSchema,
 } from "./schemas";
 
 const router = Router();
@@ -38,6 +39,76 @@ router.get(
         status: "error",
         error: e,
         msg: "we were unable to GET documents",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/aiadviser/search-documents",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await searchDocsSchema.validateAsync(req.body);
+      const skip = !req.body.skip ? 0 : parseInt(req.body.skip, 10);
+      const limit = !req.body.limit ? 100 : parseInt(req.body.limit, 10);
+      const { file_type, embedded, search } = req.body;
+      const searchEmbedded =
+        embedded !== "all" ? { embedding_created: embedded } : {}; // "all" | true | false
+
+      let searchQuery = { ...searchEmbedded };
+      console.log({ searchQuery });
+      if (file_type) {
+        searchQuery = { ...searchQuery, file_type };
+      }
+      /*
+        example with all options
+        {
+            "file_type":"txt"
+            "embedded": true,
+            "search":"van",
+            "limit":1,
+            "skip":0
+        }
+      */
+      let result;
+      if (search) {
+        result = await documentModel
+          .aggregate([
+            {
+              $match: {
+                $and: [
+                  {
+                    label: {
+                      $regex: ".*" + search + ".*",
+                      $options: "i",
+                    },
+                  },
+                  { ...searchQuery },
+                ],
+              },
+            },
+          ])
+          .skip(skip)
+          .limit(limit);
+      } else {
+        result = await documentModel
+          .find({ ...searchQuery })
+          .lean()
+          .skip(skip)
+          .limit(limit)
+          .sort({ $natural: -1 })
+          .exec();
+      }
+
+      result ? res.json(result) : res.json([]);
+    } catch (e) {
+      console.log(e);
+      res.send({
+        status: "error",
+        error: e,
+        msg: "we were unable to search the documents",
       });
     }
   }

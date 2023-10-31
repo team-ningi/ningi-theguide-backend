@@ -1,5 +1,13 @@
 import Joi from "joi";
 
+export const searchDocsSchema = Joi.object({
+  skip: Joi.number().required(),
+  limit: Joi.number().required(),
+  embedded: Joi.any().required(),
+  search: Joi.string().optional(),
+  file_type: Joi.string().optional(),
+});
+
 export const addHistorySchema = Joi.object({
   user_id: Joi.string().required(),
   history: Joi.array().required(),

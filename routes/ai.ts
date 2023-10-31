@@ -16,6 +16,7 @@ import AudioLoader from "../ai/audioloader";
 import createEmbeddings from "../ai/createEmbeddings";
 import createIndex from "../ai/pinecone/createIndex";
 import { queryPineconeVectorStoreAndQueryLLM } from "../ai/pinecone/queryPinecone";
+import GenerateDocx from "../ai/doc-generation/docx";
 
 const router = Router();
 
@@ -187,4 +188,38 @@ router.post(
   }
 );
 
+//doc gen
+router.post(
+  "/v1/aiadviser/docx-generation",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      // await questionSchema.validateAsync(req.body);
+      // const { question, documentIds } = req.body;
+      const tags = req.body.tags;
+      /*
+        TODO
+        
+        READ THE TEMPLATE FILE FROM CDN
+
+        UPLOAD OUTPUT FILE TO CDN AND UPDATE 'REPORTS' DATABASE
+
+
+      */
+
+      GenerateDocx(tags);
+
+      return res.json({
+        msg: "doc generated",
+      });
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to query data",
+      });
+    }
+  }
+);
 export default router;
