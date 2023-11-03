@@ -8,6 +8,15 @@ export const searchDocsSchema = Joi.object({
   file_type: Joi.string().optional(),
 });
 
+export const searchReportsSchema = Joi.object({
+  user_id: Joi.string().required(),
+  skip: Joi.number().required(),
+  report_type: Joi.string().required(),
+  limit: Joi.number().required(),
+  search: Joi.string().optional(),
+  file_type: Joi.string().optional(),
+});
+
 export const addHistorySchema = Joi.object({
   user_id: Joi.string().required(),
   history: Joi.array().required(),
@@ -22,6 +31,18 @@ export const addDocumentSchema = Joi.object({
   saved_filename: Joi.string().required(),
   original_filename: Joi.string().required(),
   custom_filename: Joi.string().required().allow(""),
+  metadata: Joi.object().optional(),
+});
+
+export const addReportSchema = Joi.object({
+  user_id: Joi.string().required(),
+  report_name: Joi.string().required(),
+  report_type: Joi.string().required(),
+  file_type: Joi.string().required(),
+  base_template_url: Joi.string().required(),
+  generated_report_url: Joi.string().required(),
+  document_ids: Joi.array().required(),
+  report_hidden: Joi.boolean().required(),
   metadata: Joi.object().optional(),
 });
 
@@ -46,6 +67,10 @@ export const userIdSchema = Joi.object({
 export const getDocsSchema = Joi.object({
   user_id: Joi.string().required(),
   embedded: Joi.any().required(),
+});
+
+export const getReportsSchema = Joi.object({
+  user_id: Joi.string().required(),
 });
 
 export const createIndexSchema = Joi.object({

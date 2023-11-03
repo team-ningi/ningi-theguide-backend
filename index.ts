@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import userRoutes from "./routes/users";
 import documentRoutes from "./routes/documents";
+import reportRoutes from "./routes/reports";
 import aiRoutes from "./routes/ai";
 import historyRoutes from "./routes/history";
 
@@ -31,6 +32,7 @@ app.use(userRoutes);
 app.use(documentRoutes);
 app.use(aiRoutes);
 app.use(historyRoutes);
+app.use(reportRoutes);
 
 app.listen(port, () => {
   console.log(`Listening on port: ${port}`);

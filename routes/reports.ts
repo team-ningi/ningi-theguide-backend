@@ -1,0 +1,244 @@
+// @ts-nocheck
+import { Request, Response, Router } from "express";
+import nocache from "nocache";
+import { reportsModel } from "./db/reports-model";
+import reportsCreator from "./db/reports-creator";
+import { AuthenticateManageToken } from "./helper";
+import {
+  idSchema,
+  getReportsSchema,
+  addReportSchema,
+  searchReportsSchema,
+} from "./schemas";
+
+const router = Router();
+
+router.get(
+  "/v1/aiadviser/get-all-reports",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
+      const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
+
+      const result = await reportsModel
+        .find()
+        .lean()
+        .skip(skip)
+        .limit(limit)
+        .sort({ $natural: -1 })
+        .exec();
+
+      res.json([...result]);
+    } catch (e) {
+      console.log(e);
+      res.send({
+        status: "error",
+        error: e,
+        msg: "we were unable to GET reports",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/aiadviser/search-reports",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await searchReportsSchema.validateAsync(req.body);
+      const skip = !req.body.skip ? 0 : parseInt(req.body.skip, 10);
+      const limit = !req.body.limit ? 100 : parseInt(req.body.limit, 10);
+      const { user_id, file_type, report_type, search } = req.body;
+
+      let searchQuery = { user_id };
+      if (report_type !== "all") {
+        searchQuery = { ...searchQuery, report_type };
+      }
+      if (file_type) {
+        searchQuery = { ...searchQuery, file_type };
+      }
+
+      let result;
+      if (search) {
+        result = await reportsModel
+          .aggregate([
+            {
+              $match: {
+                $and: [
+                  {
+                    report_name: {
+                      $regex: ".*" + search + ".*",
+                      $options: "i",
+                    },
+                  },
+                  { ...searchQuery },
+                ],
+              },
+            },
+          ])
+          .skip(skip)
+          .limit(limit);
+      } else {
+        result = await reportsModel
+          .find({ ...searchQuery })
+          .lean()
+          .skip(skip)
+          .limit(limit)
+          .sort({ $natural: -1 })
+          .exec();
+      }
+
+      result ? res.json(result) : res.json([]);
+    } catch (e) {
+      console.log(e);
+      res.send({
+        status: "error",
+        error: e,
+        msg: "we were unable to search the documents",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/aiadviser/get-reports-by-userid",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await getReportsSchema.validateAsync(req.body);
+      const skip = !req.query.skip ? 0 : parseInt(req.query.skip, 10);
+      const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
+      const { user_id } = req.body;
+
+      const result = await reportsModel
+        .find({ user_id, report_hidden: false })
+        .lean()
+        .skip(skip)
+        .limit(limit)
+        .sort({ $natural: -1 })
+        .exec();
+
+      result ? res.json(result) : res.json([]);
+    } catch (e) {
+      console.log(e);
+      res.send({
+        status: "error",
+        error: e,
+        msg: "we were unable to GET the users documents",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/aiadviser/get-individual-report",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await idSchema.validateAsync(req.body);
+
+      const id = req.body.id;
+      const result = await reportsModel
+        .findOne({
+          _id: id,
+        })
+        .lean()
+        .exec();
+
+      result ? res.json([result]) : res.json([]);
+    } catch (e) {
+      console.log(e);
+      res.send({
+        status: "error",
+        error: e,
+        msg: "we were unable to GET individual document",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/aiadviser/add-report",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await addReportSchema.validateAsync(req.body);
+
+      const newReport = {
+        user_id: req.body.user_id,
+        report_name: req.body.report_name,
+        report_type: req.body.report_type,
+        file_type: req.body.file_type,
+        base_template_url: req.body.base_template_url,
+        generated_report_url: req.body.generated_report_url,
+        document_ids: req.body.document_ids,
+        report_hidden: req.body.report_hidden || false,
+        metadata: req.body.metadata || {},
+      };
+      const report = await reportsCreator(newReport);
+
+      return res.json({
+        error: false,
+        report,
+        msg: "report data added",
+      });
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to insert report data",
+      });
+    }
+  }
+);
+
+router.delete(
+  "/v1/aiadviser/hide-report",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await idSchema.validateAsync(req.body);
+
+      const report = await usersModel
+        .find({
+          _id: id,
+        })
+        .lean()
+        .exec();
+
+      if (!report) {
+        return res.json({
+          error: true,
+          msg: "No report found for the id",
+        });
+      }
+
+      const result = await reportsModel.findOneAndUpdate(
+        { _id: id },
+        {
+          report_hidden: true,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+      res.json(result);
+      result
+        ? res.json({ msg: `Report ${id} has been hidden` })
+        : res.json({ msg: `Report ${id} was not found` });
+    } catch (e) {
+      console.log(e);
+      res.send({ error: e });
+    }
+  }
+);
+
+export default router;

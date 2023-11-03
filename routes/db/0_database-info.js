@@ -39,6 +39,22 @@ metadata: { type: mongoose.SchemaTypes.Mixed },
 created_at: { type: Date },
 updated_at: { type: Date },
 
+****************************************
+*    REPORTS -
+* This is a collection for all of the generated reports
+* inside the metadata will be tags_prompt object and also tag_results object
+****************************************
+_id
+user_id: { type: String, index: true },
+report_name: { type: String, index: true },
+report_type: { type: String, index: true },
+base_template_url: { type: String },
+generated_report_url: { type: String },
+document_ids: { type: Array },
+metadata: { type: mongoose.SchemaTypes.Mixed },
+created_at: { type: Date },
+updated_at: { type: Date },
+
 
 ****************************************
 *    AUDIT -
@@ -50,6 +66,7 @@ user_id: { type: String, index: true },
 document_ids: { type: String },
 question: { type: String },
 answer: { type: String },
+report_hidden: { type: Boolean,default: false },
 metadata: { type: mongoose.SchemaTypes.Mixed },
 created_at: { type: Date },
 updated_at: { type: Date },
@@ -80,6 +97,19 @@ updated_at: { type: Date },
 
 -PUT
 - WHEN EDITING EXISTING CONTENT
+
+/* REPORTS ***
+--GET
+- GET A GENERATED REPORT
+
+--POST
+- WHEN GENERATING A REPORT
+
+-PUT
+- WHEN RE GENERATING A REPORT
+
+-DELETE
+- WHEN RE REMOVING A REPORT (set flag to hide)
 
 
 /* AUDIT ***
