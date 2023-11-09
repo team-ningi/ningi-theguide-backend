@@ -1,6 +1,9 @@
-import { NextFunction, Request, Response } from "express"; //@ts-ignore
+import { NextFunction, Request, Response } from "express";
+import * as crypto from "crypto"; //@ts-ignore
 import auditCreator from "./db/audit-creator";
 import axios from "axios";
+const dotenv = require("dotenv");
+dotenv.config();
 
 export const authTokenVerification = async (token: string) => {
   try {
@@ -74,3 +77,33 @@ export const addToAudit = async (
     // swallow
   }
 };
+
+const algorithm = "aes-256-cbc";
+const ENCRYPTION_KEY = Buffer.from(
+  "FoCte7XGottHski1LmKvdLslUuB4y3EZlKayqJHvUhs=",
+  "base64"
+);
+
+export function encrypt(text: string) {
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv(algorithm, ENCRYPTION_KEY, iv);
+  const encrypted = cipher.update(text, "utf8", "hex");
+  return [
+    encrypted + cipher.final("hex"),
+    Buffer.from(iv).toString("hex"),
+  ].join("|");
+}
+
+export function decrypt(text: string) {
+  if (text) {
+    // console.log("decrypt >", text);
+    const [encrypted, iv] = text.split("|");
+    if (!iv) return console.log("IV not found");
+    const decipher = crypto.createDecipheriv(
+      algorithm,
+      ENCRYPTION_KEY,
+      Buffer.from(iv, "hex")
+    );
+    return decipher.update(encrypted, "hex", "utf8") + decipher.final("utf8");
+  }
+}

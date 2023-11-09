@@ -3,12 +3,12 @@ import { Request, Response, Router } from "express";
 import nocache from "nocache";
 import { usersModel } from "./db/users-model";
 import usersCreator from "./db/users-creator";
-import { AuthenticateManageToken } from "./helper";
+import { AuthenticateManageToken, addToAudit } from "./helper";
 import {
-  emailSchema,
+  uuidSchema,
   updateUserSchema,
   idSchema,
-  emailAddressSchema,
+  uuidAndEmailSchema,
 } from "./schemas";
 
 const router = Router();
@@ -20,13 +20,12 @@ router.get("/v1/aiadviser/get-users", nocache(), async (req, res) => {
 
     const result = await usersModel
       .find()
-      .lean()
       .skip(skip)
       .limit(limit)
       .sort({ $natural: -1 })
       .exec();
 
-    res.json([...result]);
+    res.json(result);
   } catch (e) {
     console.log(e);
     res.send({
@@ -43,23 +42,17 @@ router.post(
   AuthenticateManageToken(),
   async (req, res) => {
     try {
-      await emailSchema.validateAsync(req.body);
+      await uuidSchema.validateAsync(req.body);
 
-      const email = req.body.email;
-      const result = await usersModel
-        .findOne({
-          email,
-        })
-        .lean()
-        .exec();
+      const result = await usersModel.find({ uuid: req.body.uuid }).exec();
 
-      result ? res.json(result) : res.json([]);
+      result ? res.json(result[0]) : res.json([]);
     } catch (e) {
       console.log(e);
       res.send({
         status: "error",
         error: e,
-        msg: "we were unable to GET individual users",
+        msg: "we were unable to GET individual user",
       });
     }
   }
@@ -74,20 +67,24 @@ router.put(
       await updateUserSchema.validateAsync(req.body);
 
       const {
+        email,
         first_name,
         last_name,
         phone_number,
         address_line1,
         address_line2,
         address_line3,
+        address_line4,
         role,
-        email_address: email,
-        metadata = {},
+        company,
+        superUser,
+        uuid,
+        metadata,
       } = req.body;
 
       const user = await usersModel
         .find({
-          email,
+          uuid,
         })
         .lean()
         .exec();
@@ -95,28 +92,47 @@ router.put(
       if (!user) {
         return res.json({
           error: true,
-          msg: "No user found for the email address",
+          msg: "No user found",
         });
       }
+      console.log({ user });
+      const isSuperUser =
+        superUser === undefined ? user[0]?.superUser : superUser;
+
+      const returnValue = (string) => (string ? string : " ");
 
       const result = await usersModel.findOneAndUpdate(
-        { email },
+        { uuid },
         {
-          email,
-          first_name,
-          last_name,
-          phone_number,
-          address_line1,
-          address_line2,
-          address_line3,
-          role,
-          metadata,
+          uuid,
+          first_name: first_name || returnValue(user[0]?.first_name),
+          last_name: last_name || returnValue(user[0]?.last_name),
+          phone_number: phone_number || returnValue(user[0]?.phone_number),
+          address_line1: address_line1 || returnValue(user[0]?.address_line1),
+          address_line2: address_line2 || returnValue(user[0]?.address_line2),
+          address_line3: address_line3 || returnValue(user[0]?.address_line3),
+          address_line4: address_line4 || returnValue(user[0]?.address_line4),
+          company: company || returnValue(user[0]?.company),
+          role: role || user[0]?.role || "",
+          superUser: isSuperUser,
+          metadata: metadata || user[0]?.metadata,
         },
         {
           new: true,
           upsert: false,
         }
       );
+
+      const auditData = {
+        user_id: user[0]?._id,
+        action: "update_user",
+        metadata: {
+          uuid,
+          metadata: metadata || user[0]?.metadata,
+        },
+      };
+      await addToAudit(req, auditData);
+
       res.json(result);
     } catch (e) {
       console.log(e);
@@ -134,11 +150,11 @@ router.post(
   AuthenticateManageToken(),
   async (req, res) => {
     try {
-      await emailAddressSchema.validateAsync(req.body);
+      await uuidAndEmailSchema.validateAsync(req.body);
 
       const result = await usersModel
         .findOne({
-          email: req.body.email_address,
+          uuid: req.body.uuid,
         })
         .lean()
         .exec();
@@ -151,12 +167,13 @@ router.post(
       }
 
       const newUser = {
-        email: req.body.email_address,
+        uuid: req.body.uuid,
+        email: req.body.email,
       };
-      const user = await usersCreator(newUser);
+      await usersCreator(newUser);
+
       return res.json({
         error: false,
-        user,
         msg: "user added",
       });
     } catch (e) {

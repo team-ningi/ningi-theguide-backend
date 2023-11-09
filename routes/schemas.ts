@@ -1,5 +1,14 @@
 import Joi from "joi";
 
+export const uuidSchema = Joi.object({
+  uuid: Joi.string().required(),
+});
+
+export const uuidAndEmailSchema = Joi.object({
+  uuid: Joi.string().required(),
+  email: Joi.string().required(),
+});
+
 export const searchDocsSchema = Joi.object({
   skip: Joi.number().required(),
   limit: Joi.number().required(),
@@ -94,7 +103,8 @@ export const emailAddressSchema = Joi.object({
 });
 
 export const updateUserSchema = Joi.object({
-  email_address: Joi.string().required(),
+  uuid: Joi.string().required(),
+  email: Joi.string().optional(),
   first_name: Joi.string().optional(),
   last_name: Joi.string().optional(),
   phone_number: Joi.string().optional(),
@@ -103,8 +113,9 @@ export const updateUserSchema = Joi.object({
   address_line3: Joi.string().optional(),
   address_line4: Joi.string().optional(),
   role: Joi.string().optional(),
-  company: Joi.string().optional(),
+  superUser: Joi.boolean().optional(),
   metadata: Joi.object().optional(),
+  company: Joi.string().optional(),
 });
 
 export const updateHistorySchema = Joi.object({
