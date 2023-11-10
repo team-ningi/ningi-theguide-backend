@@ -3,10 +3,13 @@ const Docxtemplater = require("docxtemplater");
 const fs = require("fs");
 const path = require("path");
 
+/*
+docs : basic.dox  | suitabilityReportTemplate.docx
+*/
 export default async (tags: any) => {
   // Load the docx file as binary content
   const content = fs.readFileSync(
-    path.resolve(__dirname, "basic.docx"),
+    path.resolve(__dirname, "suitabilityReportTemplate.docx"),
     "binary"
   );
 
