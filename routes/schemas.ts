@@ -17,6 +17,13 @@ export const searchDocsSchema = Joi.object({
   file_type: Joi.string().optional(),
 });
 
+export const searchTemplatesSchema = Joi.object({
+  skip: Joi.number().required(),
+  limit: Joi.number().required(),
+  search: Joi.string().optional(),
+  file_type: Joi.string().optional(),
+});
+
 export const searchReportsSchema = Joi.object({
   user_id: Joi.string().required(),
   skip: Joi.number().required(),
@@ -43,16 +50,36 @@ export const addDocumentSchema = Joi.object({
   metadata: Joi.object().optional(),
 });
 
+export const addTemplateSchema = Joi.object({
+  user_id: Joi.string().required(),
+  label: Joi.string().required().allow(""),
+  tags: Joi.array().optional(),
+  file_url: Joi.string().required(),
+  file_type: Joi.string().required(),
+  saved_filename: Joi.string().required(),
+  original_filename: Joi.string().required(),
+  custom_filename: Joi.string().required().allow(""),
+  metadata: Joi.object().optional(),
+});
+
 export const addReportSchema = Joi.object({
   user_id: Joi.string().required(),
   report_name: Joi.string().required(),
   report_type: Joi.string().required(),
   file_type: Joi.string().required(),
   base_template_url: Joi.string().required(),
-  generated_report_url: Joi.string().required(),
+  generated_report_url: Joi.string().required().allow(""),
   document_ids: Joi.array().required(),
   report_hidden: Joi.boolean().required(),
+  generated_report: Joi.boolean().required(),
   metadata: Joi.object().optional(),
+});
+
+export const updateReportSchema = Joi.object({
+  user_id: Joi.string().required(),
+  report_id: Joi.string().required(),
+  generated_report_url: Joi.string().required(),
+  generated_report: Joi.boolean().required(),
 });
 
 export const resetEmbedFlagSchema = Joi.object({

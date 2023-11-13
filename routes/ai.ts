@@ -5,7 +5,7 @@ import { Pinecone } from "@pinecone-database/pinecone";
 import { auditModel } from "./db/audit-model";
 import auditCreator from "./db/audit-creator";
 import { documentModel } from "./db/document-model";
-import { AuthenticateManageToken } from "./helper";
+import { AuthenticateManageToken, addToAudit } from "./helper";
 import {
   createIndexSchema,
   createEmbeddingsSchema,
@@ -76,6 +76,16 @@ router.post(
         filterQuery
       );
 
+      const auditData = {
+        action: "query documents",
+        metadata: {
+          question,
+          answer: `${result}`,
+          documentIds,
+        },
+      };
+      await addToAudit(req, auditData);
+
       return res.json({
         question,
         answer: `${result}`,
@@ -118,13 +128,21 @@ router.post(
           environment: process.env.PINECONE_ENVIRONMENT,
         });
 
+        const data = await documentModel
+          .find({
+            _id: document_id,
+          })
+          .lean()
+          .exec();
+
         const result = await createEmbeddings(
           client,
           process.env.PINECONE_INDEX_NAME,
           user_id,
           document_url,
           document_id,
-          file_type
+          file_type,
+          data[0]?.saved_filename
         );
 
         if (!result) {

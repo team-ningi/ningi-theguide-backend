@@ -128,7 +128,7 @@ router.post(
       res.send({
         status: "error",
         error: e,
-        msg: "we were unable to GET the users documents",
+        msg: "we were unable to GET the users reports",
       });
     }
   }
@@ -198,6 +198,68 @@ router.post(
   }
 );
 
+router.put(
+  "/v1/aiadviser/update-report",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await updateReportSchema.validateAsync(req.body);
+
+      const { user_id, report_id, generated_report_url, generated_report } =
+        req.body;
+
+      const report = await reportsModel
+        .find({
+          _id: report_id,
+        })
+        .lean()
+        .exec();
+
+      if (!report) {
+        return res.json({
+          error: true,
+          msg: "No report found",
+        });
+      }
+      console.log({ report });
+
+      const result = await reportsModel.findOneAndUpdate(
+        { _id: report_id },
+        {
+          generated_report_url:
+            generated_report_url || report[0]?.generated_report_url,
+          generated_report: generated_report || report[0]?.generated_report,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+
+      const auditData = {
+        user_id: user[0]?._id,
+        action: "update_report",
+        metadata: {
+          user_id: user_id || report[0]?.user_id,
+          generated_report_url:
+            generated_report_url || report[0]?.generated_report_url,
+          generated_report: generated_report || report[0]?.generated_report,
+        },
+      };
+      await addToAudit(req, auditData);
+
+      res.json(result);
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to update user",
+      });
+    }
+  }
+);
+
 router.delete(
   "/v1/aiadviser/hide-report",
   nocache(),
@@ -206,7 +268,7 @@ router.delete(
     try {
       await idSchema.validateAsync(req.body);
 
-      const report = await usersModel
+      const report = await reportsModel
         .find({
           _id: id,
         })

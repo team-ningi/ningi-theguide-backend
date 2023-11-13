@@ -6,8 +6,26 @@ import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { DocxLoader } from "langchain/document_loaders/fs/docx";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { Errback, Response } from "express";
+// import { S3 } from "aws-sdk";
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const fs = require("fs");
 const https = require("https");
+
+const s3Client = new S3Client({
+  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+  region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
+});
+const getPresignedUrl = async (filePath: string) =>
+  getSignedUrl(
+    s3Client,
+    new GetObjectCommand({
+      Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
+      Key: filePath,
+    }),
+    { expiresIn: 60 }
+  );
 
 export default async (
   client: Pinecone,
@@ -15,15 +33,19 @@ export default async (
   user_id: string,
   document_url: string,
   document_id: string,
-  file_type: string
+  file_type: string,
+  saved_filename: string
 ) => {
   let loader;
   const streamName = `/tmp/${document_id}.${file_type}`;
 
   const file = fs.createWriteStream(streamName);
 
+  const docURL = await getPresignedUrl(`${saved_filename}`); //document_url
+  console.log("Signed URL > ", docURL);
+
   const body = await new Promise((resolve, reject) => {
-    https.get(document_url, (response: Response) => {
+    https.get(docURL, (response: Response) => {
       var stream = response.pipe(file);
       stream.on("finish", function () {
         fs.readFile(streamName, "utf8", (err: Errback, data: string) => {

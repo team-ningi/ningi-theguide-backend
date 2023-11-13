@@ -32,12 +32,33 @@ _id
 user_id: { type: String, index: true },
 label: { type: String },
 file_url: { type: String },
+file_type: { type: String, index: true },
 original_filename: { type: String, index: true },
+saved_filename: { type: String, index: true },
+custom_filename: { type: String, index: true },
+embedding_created: { type: Boolean, default: false },
+metadata: { type: mongoose.SchemaTypes.Mixed },
+created_at: { type: Date },
+updated_at: { type: Date },
+
+
+****************************************
+*    TEMPLATES -
+* This is a collection for all of the uploaded documents
+****************************************
+_id
+user_id: { type: String, index: true },
+label: { type: String },
+file_url: { type: String },
+file_type: { type: String, index: true },
+original_filename: { type: String, index: true },
+tags: { type: Array },
 saved_filename: { type: String, index: true },
 custom_filename: { type: String, index: true },
 metadata: { type: mongoose.SchemaTypes.Mixed },
 created_at: { type: Date },
 updated_at: { type: Date },
+
 
 ****************************************
 *    REPORTS -
@@ -84,6 +105,16 @@ updated_at: { type: Date },
 
 --PUT
 - when user changes profile details
+
+/* TEMPLATES ***
+--GET
+- GET AN UPLOADED TEMPLATE
+
+--POST
+- WHEN CREATING TEMPLATE
+
+-PUT
+- WHEN EDITING TAGS FOR  TEMPLATE 
 
 
 /* DOCUMENTS ***
