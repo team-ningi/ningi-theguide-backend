@@ -219,19 +219,10 @@ router.post(
       /*
         TODO
         
-       1  READ THE TEMPLATE FILE FROM CDN
-
-       2 UPLOAD OUTPUT FILE TO CDN AND UPDATE 'REPORTS' DATABASE 
-          /add-report
-          body:{
-            "user_id":"65281afb4b34e6edd11c1d1b",
-            "report_name": "test",
-            "report_type": "test",
-            "base_template_url": "URL",
-            "generated_report_url": "URL",
-            "document_ids": [],
-            "metadata":{}
-          }
+       PASS THIS IN:
+          REPORT ID
+          TEMPLATE URL                > templateToUse
+          FILENAME TO SAVE REPORT AS  > reportOutputName
 
       */
 

@@ -79,10 +79,7 @@ export const addToAudit = async (
 };
 
 const algorithm = "aes-256-cbc";
-const ENCRYPTION_KEY = Buffer.from(
-  "FoCte7XGottHski1LmKvdLslUuB4y3EZlKayqJHvUhs=",
-  "base64"
-);
+const ENCRYPTION_KEY = Buffer.from(`${process.env.ENCRYPTION_KEY}`, "base64");
 
 export function encrypt(text: string) {
   const iv = crypto.randomBytes(16);

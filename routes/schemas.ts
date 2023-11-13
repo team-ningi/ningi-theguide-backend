@@ -150,3 +150,8 @@ export const updateHistorySchema = Joi.object({
   history: Joi.array().required(),
   metadata: Joi.object().optional(),
 });
+
+export const returnPresignedURLSchema = Joi.object({
+  user_id: Joi.string().optional(),
+  file: Joi.string().required(),
+});
