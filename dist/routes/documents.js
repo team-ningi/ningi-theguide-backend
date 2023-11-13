@@ -10,6 +10,17 @@ const document_model_1 = require("./db/document-model");
 const document_creator_1 = __importDefault(require("./db/document-creator"));
 const helper_1 = require("./helper");
 const schemas_1 = require("./schemas");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const s3Client = new S3Client({
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
+});
+const getPresignedUrl = async (filePath) => getSignedUrl(s3Client, new GetObjectCommand({
+    Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
+    Key: filePath,
+}), { expiresIn: 60 });
 const router = (0, express_1.Router)();
 router.get("/v1/aiadviser/get-all-documents", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
@@ -31,6 +42,69 @@ router.get("/v1/aiadviser/get-all-documents", (0, nocache_1.default)(), (0, help
             status: "error",
             error: e,
             msg: "we were unable to GET documents",
+        });
+    }
+});
+router.post("/v1/aiadviser/search-documents", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.searchDocsSchema.validateAsync(req.body);
+        const skip = !req.body.skip ? 0 : parseInt(req.body.skip, 10);
+        const limit = !req.body.limit ? 100 : parseInt(req.body.limit, 10);
+        const { file_type, embedded, search } = req.body;
+        const searchEmbedded = embedded !== "all" ? { embedding_created: embedded } : {}; // "all" | true | false
+        let searchQuery = { ...searchEmbedded };
+        console.log({ searchQuery });
+        if (file_type) {
+            searchQuery = { ...searchQuery, file_type };
+        }
+        /*
+          example with all options
+          {
+              "file_type":"txt"
+              "embedded": true,
+              "search":"van",
+              "limit":1,
+              "skip":0
+          }
+        */
+        let result;
+        if (search) {
+            result = await document_model_1.documentModel
+                .aggregate([
+                {
+                    $match: {
+                        $and: [
+                            {
+                                label: {
+                                    $regex: ".*" + search + ".*",
+                                    $options: "i",
+                                },
+                            },
+                            { ...searchQuery },
+                        ],
+                    },
+                },
+            ])
+                .skip(skip)
+                .limit(limit);
+        }
+        else {
+            result = await document_model_1.documentModel
+                .find({ ...searchQuery })
+                .lean()
+                .skip(skip)
+                .limit(limit)
+                .sort({ $natural: -1 })
+                .exec();
+        }
+        result ? res.json(result) : res.json([]);
+    }
+    catch (e) {
+        console.log(e);
+        res.send({
+            status: "error",
+            error: e,
+            msg: "we were unable to search the documents",
         });
     }
 });
@@ -154,6 +228,24 @@ router.delete("/v1/aiadviser/delete-document", (0, nocache_1.default)(), (0, hel
     catch (e) {
         console.log(e);
         res.send({ error: e });
+    }
+});
+router.post("/v1/aiadviser/return-presigned-url", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.returnPresignedURLSchema.validateAsync(req.body);
+        const { file } = req.body;
+        const signedURL = await getPresignedUrl(file);
+        // console.log(signedURL);
+        return res.json({
+            signedURL,
+        });
+    }
+    catch (e) {
+        console.log(e);
+        return res.json({
+            error: true,
+            msg: "failed to return URL",
+        });
     }
 });
 exports.default = router;

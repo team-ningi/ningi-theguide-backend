@@ -7,12 +7,16 @@ require("dotenv/config");
 const memory_1 = require("langchain/vectorstores/memory");
 const openai_1 = require("langchain/embeddings/openai");
 const text_1 = require("langchain/document_loaders/fs/text");
+const docx_1 = require("langchain/document_loaders/fs/docx");
 const pdf_1 = require("langchain/document_loaders/fs/pdf");
 const axios_1 = __importDefault(require("axios"));
 exports.default = async (question = "", filePath = "") => {
     const fileExtension = filePath.split(".").pop();
     let loader;
-    if (fileExtension === "txt") {
+    if (fileExtension === "docx") {
+        loader = new docx_1.DocxLoader(filePath);
+    }
+    else if (fileExtension === "txt") {
         loader = new text_1.TextLoader(filePath);
     }
     else if (fileExtension === "pdf") {

@@ -17,12 +17,11 @@ router.get("/v1/aiadviser/get-users", (0, nocache_1.default)(), async (req, res)
         const limit = !req.query.limit ? 100 : parseInt(req.query.limit, 10);
         const result = await users_model_1.usersModel
             .find()
-            .lean()
             .skip(skip)
             .limit(limit)
             .sort({ $natural: -1 })
             .exec();
-        res.json([...result]);
+        res.json(result);
     }
     catch (e) {
         console.log(e);
@@ -35,55 +34,64 @@ router.get("/v1/aiadviser/get-users", (0, nocache_1.default)(), async (req, res)
 });
 router.post("/v1/aiadviser/get-individual-user", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
-        await schemas_1.emailSchema.validateAsync(req.body);
-        const email = req.body.email;
-        const result = await users_model_1.usersModel
-            .findOne({
-            email,
-        })
-            .lean()
-            .exec();
-        result ? res.json(result) : res.json([]);
+        await schemas_1.uuidSchema.validateAsync(req.body);
+        const result = await users_model_1.usersModel.find({ uuid: req.body.uuid }).exec();
+        result ? res.json(result[0]) : res.json([]);
     }
     catch (e) {
         console.log(e);
         res.send({
             status: "error",
             error: e,
-            msg: "we were unable to GET individual users",
+            msg: "we were unable to GET individual user",
         });
     }
 });
 router.put("/v1/aiadviser/update-user", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
         await schemas_1.updateUserSchema.validateAsync(req.body);
-        const { first_name, last_name, phone_number, address_line1, address_line2, address_line3, role, email_address: email, metadata = {}, } = req.body;
+        const { email, first_name, last_name, phone_number, address_line1, address_line2, address_line3, address_line4, role, company, superUser, uuid, metadata, } = req.body;
         const user = await users_model_1.usersModel
             .find({
-            email,
+            uuid,
         })
             .lean()
             .exec();
         if (!user) {
             return res.json({
                 error: true,
-                msg: "No user found for the email address",
+                msg: "No user found",
             });
         }
-        const result = await users_model_1.usersModel.findOneAndUpdate({ email }, {
-            email,
-            first_name,
-            last_name,
-            phone_number,
-            address_line1,
-            address_line2,
-            address_line3,
-            role,
-            metadata,
+        console.log({ user });
+        const isSuperUser = superUser === undefined ? user[0]?.superUser : superUser;
+        const returnValue = (string) => (string ? string : " ");
+        const result = await users_model_1.usersModel.findOneAndUpdate({ uuid }, {
+            uuid,
+            first_name: first_name || returnValue(user[0]?.first_name),
+            last_name: last_name || returnValue(user[0]?.last_name),
+            phone_number: phone_number || returnValue(user[0]?.phone_number),
+            address_line1: address_line1 || returnValue(user[0]?.address_line1),
+            address_line2: address_line2 || returnValue(user[0]?.address_line2),
+            address_line3: address_line3 || returnValue(user[0]?.address_line3),
+            address_line4: address_line4 || returnValue(user[0]?.address_line4),
+            company: company || returnValue(user[0]?.company),
+            role: role || user[0]?.role || "",
+            superUser: isSuperUser,
+            metadata: metadata || user[0]?.metadata,
         }, {
             new: true,
             upsert: false,
         });
+        const auditData = {
+            user_id: user[0]?._id,
+            action: "update_user",
+            metadata: {
+                uuid,
+                metadata: metadata || user[0]?.metadata,
+            },
+        };
+        await (0, helper_1.addToAudit)(req, auditData);
         res.json(result);
     }
     catch (e) {
@@ -96,10 +104,10 @@ router.put("/v1/aiadviser/update-user", (0, nocache_1.default)(), (0, helper_1.A
 });
 router.post("/v1/aiadviser/create-user", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
-        await schemas_1.emailAddressSchema.validateAsync(req.body);
+        await schemas_1.uuidAndEmailSchema.validateAsync(req.body);
         const result = await users_model_1.usersModel
             .findOne({
-            email: req.body.email_address,
+            uuid: req.body.uuid,
         })
             .lean()
             .exec();
@@ -110,12 +118,12 @@ router.post("/v1/aiadviser/create-user", (0, nocache_1.default)(), (0, helper_1.
             });
         }
         const newUser = {
-            email: req.body.email_address,
+            uuid: req.body.uuid,
+            email: req.body.email,
         };
-        const user = await (0, users_creator_1.default)(newUser);
+        await (0, users_creator_1.default)(newUser);
         return res.json({
             error: false,
-            user,
             msg: "user added",
         });
     }

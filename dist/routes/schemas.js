@@ -3,8 +3,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.questionSchema = exports.resetEmbedFlagSchema = exports.addDocumentSchema = exports.addHistorySchema = void 0;
+exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.questionSchema = exports.resetEmbedFlagSchema = exports.updateReportSchema = exports.addReportSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
+exports.uuidSchema = joi_1.default.object({
+    uuid: joi_1.default.string().required(),
+});
+exports.uuidAndEmailSchema = joi_1.default.object({
+    uuid: joi_1.default.string().required(),
+    email: joi_1.default.string().required(),
+});
+exports.searchDocsSchema = joi_1.default.object({
+    skip: joi_1.default.number().required(),
+    limit: joi_1.default.number().required(),
+    embedded: joi_1.default.any().required(),
+    search: joi_1.default.string().optional(),
+    file_type: joi_1.default.string().optional(),
+});
+exports.searchTemplatesSchema = joi_1.default.object({
+    skip: joi_1.default.number().required(),
+    limit: joi_1.default.number().required(),
+    search: joi_1.default.string().optional(),
+    file_type: joi_1.default.string().optional(),
+});
+exports.searchReportsSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    skip: joi_1.default.number().required(),
+    report_type: joi_1.default.string().required(),
+    limit: joi_1.default.number().required(),
+    search: joi_1.default.string().optional(),
+    file_type: joi_1.default.string().optional(),
+});
 exports.addHistorySchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
     history: joi_1.default.array().required(),
@@ -19,6 +47,35 @@ exports.addDocumentSchema = joi_1.default.object({
     original_filename: joi_1.default.string().required(),
     custom_filename: joi_1.default.string().required().allow(""),
     metadata: joi_1.default.object().optional(),
+});
+exports.addTemplateSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    label: joi_1.default.string().required().allow(""),
+    tags: joi_1.default.array().optional(),
+    file_url: joi_1.default.string().required(),
+    file_type: joi_1.default.string().required(),
+    saved_filename: joi_1.default.string().required(),
+    original_filename: joi_1.default.string().required(),
+    custom_filename: joi_1.default.string().required().allow(""),
+    metadata: joi_1.default.object().optional(),
+});
+exports.addReportSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    report_name: joi_1.default.string().required(),
+    report_type: joi_1.default.string().required(),
+    file_type: joi_1.default.string().required(),
+    base_template_url: joi_1.default.string().required(),
+    generated_report_url: joi_1.default.string().required().allow(""),
+    document_ids: joi_1.default.array().required(),
+    report_hidden: joi_1.default.boolean().required(),
+    generated_report: joi_1.default.boolean().required(),
+    metadata: joi_1.default.object().optional(),
+});
+exports.updateReportSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    report_id: joi_1.default.string().required(),
+    generated_report_url: joi_1.default.string().required(),
+    generated_report: joi_1.default.boolean().required(),
 });
 exports.resetEmbedFlagSchema = joi_1.default.object({
     embed_flag: joi_1.default.boolean().required(),
@@ -38,6 +95,9 @@ exports.getDocsSchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
     embedded: joi_1.default.any().required(),
 });
+exports.getReportsSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+});
 exports.createIndexSchema = joi_1.default.object({
     index_name: joi_1.default.string().required(),
     vector_dimension: joi_1.default.number().required(),
@@ -55,7 +115,8 @@ exports.emailAddressSchema = joi_1.default.object({
     email_address: joi_1.default.string().required(),
 });
 exports.updateUserSchema = joi_1.default.object({
-    email_address: joi_1.default.string().required(),
+    uuid: joi_1.default.string().required(),
+    email: joi_1.default.string().optional(),
     first_name: joi_1.default.string().optional(),
     last_name: joi_1.default.string().optional(),
     phone_number: joi_1.default.string().optional(),
@@ -64,11 +125,16 @@ exports.updateUserSchema = joi_1.default.object({
     address_line3: joi_1.default.string().optional(),
     address_line4: joi_1.default.string().optional(),
     role: joi_1.default.string().optional(),
-    company: joi_1.default.string().optional(),
+    superUser: joi_1.default.boolean().optional(),
     metadata: joi_1.default.object().optional(),
+    company: joi_1.default.string().optional(),
 });
 exports.updateHistorySchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
     history: joi_1.default.array().required(),
     metadata: joi_1.default.object().optional(),
+});
+exports.returnPresignedURLSchema = joi_1.default.object({
+    user_id: joi_1.default.string().optional(),
+    file: joi_1.default.string().required(),
 });

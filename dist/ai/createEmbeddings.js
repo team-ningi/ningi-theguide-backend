@@ -5,14 +5,29 @@ const openai_1 = require("langchain/embeddings/openai");
 const text_splitter_1 = require("langchain/text_splitter");
 const text_1 = require("langchain/document_loaders/fs/text");
 const pdf_1 = require("langchain/document_loaders/fs/pdf");
+const docx_1 = require("langchain/document_loaders/fs/docx");
+// import { S3 } from "aws-sdk";
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const fs = require("fs");
 const https = require("https");
-exports.default = async (client, indexName, user_id, document_url, document_id, file_type) => {
+const s3Client = new S3Client({
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
+});
+const getPresignedUrl = async (filePath) => getSignedUrl(s3Client, new GetObjectCommand({
+    Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
+    Key: filePath,
+}), { expiresIn: 60 });
+exports.default = async (client, indexName, user_id, document_url, document_id, file_type, saved_filename) => {
     let loader;
     const streamName = `/tmp/${document_id}.${file_type}`;
     const file = fs.createWriteStream(streamName);
+    const docURL = await getPresignedUrl(`${saved_filename}`); //document_url
+    console.log("Signed URL > ", docURL);
     const body = await new Promise((resolve, reject) => {
-        https.get(document_url, (response) => {
+        https.get(docURL, (response) => {
             var stream = response.pipe(file);
             stream.on("finish", function () {
                 fs.readFile(streamName, "utf8", (err, data) => {
@@ -25,7 +40,10 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
             });
         });
     });
-    if (file_type === "txt") {
+    if (file_type === "docx") {
+        loader = new docx_1.DocxLoader(streamName);
+    }
+    else if (file_type === "txt") {
         loader = new text_1.TextLoader(streamName);
     }
     else if (file_type === "pdf") {
