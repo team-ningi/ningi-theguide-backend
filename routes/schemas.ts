@@ -65,7 +65,14 @@ export const addTemplateSchema = Joi.object({
 
 export const addTagsSchema = Joi.object({
   user_id: Joi.string().required(),
-  label: Joi.string().required().allow(""),
+  label: Joi.string().required(),
+  tags: Joi.array().optional(),
+  metadata: Joi.object().optional(),
+});
+
+export const updateTagsSchema = Joi.object({
+  id: Joi.string().required(),
+  label: Joi.string().required(),
   tags: Joi.array().optional(),
   metadata: Joi.object().optional(),
 });

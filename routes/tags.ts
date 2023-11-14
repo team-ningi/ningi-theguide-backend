@@ -4,7 +4,12 @@ import nocache from "nocache";
 import { tagsModel } from "./db/tags-model";
 import tagsCreator from "./db/tags-creator";
 import { AuthenticateManageToken } from "./helper";
-import { idSchema, userIdSchema, addTagsSchema } from "./schemas";
+import {
+  idSchema,
+  userIdSchema,
+  addTagsSchema,
+  updateTagsSchema,
+} from "./schemas";
 
 const router = Router();
 
@@ -117,6 +122,40 @@ router.post(
         tags,
         msg: "tags data added",
       });
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to insert tags",
+      });
+    }
+  }
+);
+router.put(
+  "/v1/aiadviser/update-tags",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await updateTagsSchema.validateAsync(req.body);
+
+      const { id, label, first_name, tags, metadata } = req.body;
+
+      const result = await usersModel.findOneAndUpdate(
+        { _id: id },
+        {
+          label,
+          first_name,
+          tags,
+          metadata: metadata,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+
+      res.json(result);
     } catch (e) {
       console.log(e);
       return res.json({
