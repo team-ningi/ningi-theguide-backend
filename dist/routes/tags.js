@@ -102,6 +102,29 @@ router.post("/v1/aiadviser/add-tags", (0, nocache_1.default)(), (0, helper_1.Aut
         });
     }
 });
+router.put("/v1/aiadviser/update-tags", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.updateTagsSchema.validateAsync(req.body);
+        const { id, label, first_name, tags, metadata } = req.body;
+        const result = await usersModel.findOneAndUpdate({ _id: id }, {
+            label,
+            first_name,
+            tags,
+            metadata: metadata,
+        }, {
+            new: true,
+            upsert: false,
+        });
+        res.json(result);
+    }
+    catch (e) {
+        console.log(e);
+        return res.json({
+            error: true,
+            msg: "failed to insert tags",
+        });
+    }
+});
 router.delete("/v1/aiadviser/delete-tags", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
         await schemas_1.idSchema.validateAsync(req.body);
