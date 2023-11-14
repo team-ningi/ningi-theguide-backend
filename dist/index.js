@@ -13,6 +13,7 @@ const cors_1 = __importDefault(require("cors"));
 const users_1 = __importDefault(require("./routes/users"));
 const documents_1 = __importDefault(require("./routes/documents"));
 const templates_1 = __importDefault(require("./routes/templates"));
+const tags_1 = __importDefault(require("./routes/tags"));
 const reports_1 = __importDefault(require("./routes/reports"));
 const ai_1 = __importDefault(require("./routes/ai"));
 const history_1 = __importDefault(require("./routes/history"));
@@ -31,6 +32,7 @@ app.get("/", (req, res) => {
 app.use(users_1.default);
 app.use(documents_1.default);
 app.use(templates_1.default);
+app.use(tags_1.default);
 app.use(ai_1.default);
 app.use(history_1.default);
 app.use(reports_1.default);

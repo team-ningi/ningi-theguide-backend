@@ -9,6 +9,7 @@ const reportsSchema = new mongoose.Schema({
     file_type: { type: String, index: true },
     base_template_url: { type: String },
     generated_report_url: { type: String },
+    tags: { type: Array },
     document_ids: { type: Array },
     report_hidden: { type: Boolean, default: false },
     metadata: { type: mongoose.SchemaTypes.Mixed },

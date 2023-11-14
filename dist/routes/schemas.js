@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.questionSchema = exports.resetEmbedFlagSchema = exports.updateReportSchema = exports.addReportSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
+exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.questionSchema = exports.resetEmbedFlagSchema = exports.updateReportSchema = exports.addReportSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
 exports.uuidSchema = joi_1.default.object({
     uuid: joi_1.default.string().required(),
@@ -53,7 +53,6 @@ exports.addDocumentSchema = joi_1.default.object({
 exports.addTemplateSchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
     label: joi_1.default.string().required().allow(""),
-    tags: joi_1.default.array().optional(),
     file_url: joi_1.default.string().required(),
     file_type: joi_1.default.string().required(),
     saved_filename: joi_1.default.string().required(),
@@ -61,12 +60,19 @@ exports.addTemplateSchema = joi_1.default.object({
     custom_filename: joi_1.default.string().required().allow(""),
     metadata: joi_1.default.object().optional(),
 });
+exports.addTagsSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    label: joi_1.default.string().required().allow(""),
+    tags: joi_1.default.array().optional(),
+    metadata: joi_1.default.object().optional(),
+});
 exports.addReportSchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
     report_name: joi_1.default.string().required(),
     report_type: joi_1.default.string().required(),
     file_type: joi_1.default.string().required(),
-    base_template_url: joi_1.default.string().required(),
+    tags: joi_1.default.array().required(),
+    base_template_url: joi_1.default.string().required().allow(""),
     generated_report_url: joi_1.default.string().required().allow(""),
     document_ids: joi_1.default.array().required(),
     report_hidden: joi_1.default.boolean().required(),
