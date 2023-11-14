@@ -156,11 +156,12 @@ router.post("/v1/aiadviser/docx-generation", (0, nocache_1.default)(), (0, helpe
         /*
           TODO
           
-         PASS THIS IN:
-            REPORT ID
-            TEMPLATE URL                > templateToUse
-            FILENAME TO SAVE REPORT AS  > reportOutputName
-  
+         PASS THIS IN TO
+          REPORT ID
+          TEMPLATE URL                > templateToUse
+          FILENAME TO SAVE REPORT AS  > reportOutputName
+         
+          GenerateDocx(tags,reportName,templateURL, OutputName)   :
         */
         (0, docx_1.default)(tags);
         return res.json({

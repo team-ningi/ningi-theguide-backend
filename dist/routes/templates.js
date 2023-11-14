@@ -38,12 +38,13 @@ router.post("/v1/aiadviser/search-templates", (0, nocache_1.default)(), (0, help
         await schemas_1.searchTemplatesSchema.validateAsync(req.body);
         const skip = !req.body.skip ? 0 : parseInt(req.body.skip, 10);
         const limit = !req.body.limit ? 100 : parseInt(req.body.limit, 10);
-        const { file_type, search } = req.body;
-        let searchQuery = {};
+        const { user_id, file_type, search } = req.body;
+        let searchQuery = { user_id };
         console.log({ searchQuery });
         if (file_type) {
-            searchQuery = { file_type };
+            searchQuery = { ...searchQuery, file_type };
         }
+        //TODO -> PASS IN USER ID
         /*
           example with all options
           {

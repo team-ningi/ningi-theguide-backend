@@ -219,11 +219,12 @@ router.post(
       /*
         TODO
         
-       PASS THIS IN:
-          REPORT ID
-          TEMPLATE URL                > templateToUse
-          FILENAME TO SAVE REPORT AS  > reportOutputName
-
+       PASS THIS IN TO   
+        REPORT ID
+        TEMPLATE URL                > templateToUse
+        FILENAME TO SAVE REPORT AS  > reportOutputName
+       
+        GenerateDocx(tags,reportName,templateURL, OutputName)   :
       */
 
       GenerateDocx(tags);

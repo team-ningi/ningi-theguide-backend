@@ -13,6 +13,7 @@ exports.uuidAndEmailSchema = joi_1.default.object({
     email: joi_1.default.string().required(),
 });
 exports.searchDocsSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
     skip: joi_1.default.number().required(),
     limit: joi_1.default.number().required(),
     embedded: joi_1.default.any().required(),
@@ -20,6 +21,7 @@ exports.searchDocsSchema = joi_1.default.object({
     file_type: joi_1.default.string().optional(),
 });
 exports.searchTemplatesSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
     skip: joi_1.default.number().required(),
     limit: joi_1.default.number().required(),
     search: joi_1.default.string().optional(),
