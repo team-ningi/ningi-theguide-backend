@@ -10,6 +10,7 @@ export const uuidAndEmailSchema = Joi.object({
 });
 
 export const searchDocsSchema = Joi.object({
+  user_id: Joi.string().required(),
   skip: Joi.number().required(),
   limit: Joi.number().required(),
   embedded: Joi.any().required(),
@@ -18,6 +19,7 @@ export const searchDocsSchema = Joi.object({
 });
 
 export const searchTemplatesSchema = Joi.object({
+  user_id: Joi.string().required(),
   skip: Joi.number().required(),
   limit: Joi.number().required(),
   search: Joi.string().optional(),

@@ -20,7 +20,7 @@ const s3Client = new S3Client({
   secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
   region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
-console.log("can read env ", process.env.NEXT_PUBLIC_AWS_KEY_REGION);
+
 const getPresignedUrl = async (filePath: string) =>
   getSignedUrl(
     s3Client,
@@ -72,15 +72,16 @@ router.post(
       await searchDocsSchema.validateAsync(req.body);
       const skip = !req.body.skip ? 0 : parseInt(req.body.skip, 10);
       const limit = !req.body.limit ? 100 : parseInt(req.body.limit, 10);
-      const { file_type, embedded, search } = req.body;
+      const { user_id, file_type, embedded, search } = req.body;
       const searchEmbedded =
         embedded !== "all" ? { embedding_created: embedded } : {}; // "all" | true | false
 
-      let searchQuery = { ...searchEmbedded };
+      let searchQuery = { user_id, ...searchEmbedded };
       console.log({ searchQuery });
       if (file_type) {
         searchQuery = { ...searchQuery, file_type };
       }
+
       /*
         example with all options
         {
