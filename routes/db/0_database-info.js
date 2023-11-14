@@ -76,6 +76,18 @@ metadata: { type: mongoose.SchemaTypes.Mixed },
 created_at: { type: Date },
 updated_at: { type: Date },
 
+****************************************
+*    TAGS -
+* This is a collection for all the tag arrays
+* these appear in the dropdown at report creation
+****************************************
+_id
+user_id: { type: String, index: true },
+label: { type: String, index: true },
+tags: { type: Array },
+metadata: { type: mongoose.SchemaTypes.Mixed },
+created_at: { type: Date },
+updated_at: { type: Date },
 
 ****************************************
 *    AUDIT -

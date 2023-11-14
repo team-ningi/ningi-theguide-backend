@@ -8,6 +8,7 @@ import cors from "cors";
 import userRoutes from "./routes/users";
 import documentRoutes from "./routes/documents";
 import templateRoutes from "./routes/templates";
+import tagsRoutes from "./routes/tags";
 import reportRoutes from "./routes/reports";
 import aiRoutes from "./routes/ai";
 import historyRoutes from "./routes/history";
@@ -32,6 +33,7 @@ app.get("/", (req, res) => {
 app.use(userRoutes);
 app.use(documentRoutes);
 app.use(templateRoutes);
+app.use(tagsRoutes);
 app.use(aiRoutes);
 app.use(historyRoutes);
 app.use(reportRoutes);

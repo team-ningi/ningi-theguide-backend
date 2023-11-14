@@ -11,7 +11,6 @@ const templateSchema = new mongoose.Schema(
     file_url: { type: String },
     file_type: { type: String, index: true },
     original_filename: { type: String, index: true },
-    tags: { type: Array },
     saved_filename: { type: String, index: true },
     custom_filename: { type: String, index: true },
     metadata: { type: mongoose.SchemaTypes.Mixed },

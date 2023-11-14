@@ -55,7 +55,6 @@ export const addDocumentSchema = Joi.object({
 export const addTemplateSchema = Joi.object({
   user_id: Joi.string().required(),
   label: Joi.string().required().allow(""),
-  tags: Joi.array().optional(),
   file_url: Joi.string().required(),
   file_type: Joi.string().required(),
   saved_filename: Joi.string().required(),
@@ -64,12 +63,20 @@ export const addTemplateSchema = Joi.object({
   metadata: Joi.object().optional(),
 });
 
+export const addTagsSchema = Joi.object({
+  user_id: Joi.string().required(),
+  label: Joi.string().required().allow(""),
+  tags: Joi.array().optional(),
+  metadata: Joi.object().optional(),
+});
+
 export const addReportSchema = Joi.object({
   user_id: Joi.string().required(),
   report_name: Joi.string().required(),
   report_type: Joi.string().required(),
   file_type: Joi.string().required(),
-  base_template_url: Joi.string().required(),
+  tags: Joi.array().required(),
+  base_template_url: Joi.string().required().allow(""),
   generated_report_url: Joi.string().required().allow(""),
   document_ids: Joi.array().required(),
   report_hidden: Joi.boolean().required(),
