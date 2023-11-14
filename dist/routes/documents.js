@@ -17,10 +17,11 @@ const s3Client = new S3Client({
     secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
     region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
+console.log("can read env ", process.env.NEXT_PUBLIC_AWS_KEY_REGION);
 const getPresignedUrl = async (filePath) => getSignedUrl(s3Client, new GetObjectCommand({
     Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
     Key: filePath,
-}), { expiresIn: 60 });
+}), { expiresIn: 6000 });
 const router = (0, express_1.Router)();
 router.get("/v1/aiadviser/get-all-documents", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
