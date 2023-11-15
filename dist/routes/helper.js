@@ -35,8 +35,10 @@ const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const dotenv = require("dotenv");
 dotenv.config();
 const s3Client = new S3Client({
-    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    credentials: {
+        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    },
     region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
 const getPresignedUrl = async (filePath) => getSignedUrl(s3Client, new GetObjectCommand({
