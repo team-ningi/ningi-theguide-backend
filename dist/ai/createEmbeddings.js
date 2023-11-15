@@ -6,25 +6,14 @@ const text_splitter_1 = require("langchain/text_splitter");
 const text_1 = require("langchain/document_loaders/fs/text");
 const pdf_1 = require("langchain/document_loaders/fs/pdf");
 const docx_1 = require("langchain/document_loaders/fs/docx");
-// import { S3 } from "aws-sdk";
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const fs = require("fs");
 const https = require("https");
-const s3Client = new S3Client({
-    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-    region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
-});
-const getPresignedUrl = async (filePath) => getSignedUrl(s3Client, new GetObjectCommand({
-    Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
-    Key: filePath,
-}), { expiresIn: 60 });
+const helper_1 = require("../routes/helper");
 exports.default = async (client, indexName, user_id, document_url, document_id, file_type, saved_filename) => {
     let loader;
     const streamName = `/tmp/${document_id}.${file_type}`;
     const file = fs.createWriteStream(streamName);
-    const docURL = await getPresignedUrl(`${saved_filename}`); //document_url
+    const docURL = await (0, helper_1.getPresignedUrl)(`${saved_filename}`); //document_url
     console.log("Signed URL > ", docURL);
     const body = await new Promise((resolve, reject) => {
         https.get(docURL, (response) => {

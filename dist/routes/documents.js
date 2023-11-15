@@ -10,17 +10,7 @@ const document_model_1 = require("./db/document-model");
 const document_creator_1 = __importDefault(require("./db/document-creator"));
 const helper_1 = require("./helper");
 const schemas_1 = require("./schemas");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
-const s3Client = new S3Client({
-    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-    region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
-});
-const getPresignedUrl = async (filePath) => getSignedUrl(s3Client, new GetObjectCommand({
-    Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
-    Key: filePath,
-}), { expiresIn: 6000 });
+const helper_2 = require("../routes/helper");
 const router = (0, express_1.Router)();
 router.get("/v1/aiadviser/get-all-documents", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
@@ -234,7 +224,7 @@ router.post("/v1/aiadviser/return-presigned-url", (0, nocache_1.default)(), (0, 
     try {
         await schemas_1.returnPresignedURLSchema.validateAsync(req.body);
         const { file } = req.body;
-        const signedURL = await getPresignedUrl(file);
+        const signedURL = await (0, helper_2.getPresignedUrl)(file);
         console.log(signedURL);
         return res.json({
             signedURL,

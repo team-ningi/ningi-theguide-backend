@@ -6,26 +6,9 @@ import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { DocxLoader } from "langchain/document_loaders/fs/docx";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { Errback, Response } from "express";
-// import { S3 } from "aws-sdk";
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const fs = require("fs");
 const https = require("https");
-
-const s3Client = new S3Client({
-  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-  region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
-});
-const getPresignedUrl = async (filePath: string) =>
-  getSignedUrl(
-    s3Client,
-    new GetObjectCommand({
-      Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
-      Key: filePath,
-    }),
-    { expiresIn: 60 }
-  );
+import { getPresignedUrl } from "../routes/helper";
 
 export default async (
   client: Pinecone,

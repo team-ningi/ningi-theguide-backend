@@ -26,12 +26,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.decrypt = exports.encrypt = exports.addToAudit = exports.AuthenticateManageToken = exports.authTokenVerification = void 0;
+exports.decrypt = exports.encrypt = exports.addToAudit = exports.AuthenticateManageToken = exports.authTokenVerification = exports.getPresignedUrl = void 0;
 const crypto = __importStar(require("crypto")); //@ts-ignore
 const audit_creator_1 = __importDefault(require("./db/audit-creator"));
 const axios_1 = __importDefault(require("axios"));
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
 const dotenv = require("dotenv");
 dotenv.config();
+const s3Client = new S3Client({
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
+});
+const getPresignedUrl = async (filePath) => getSignedUrl(s3Client, new GetObjectCommand({
+    Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
+    Key: filePath,
+}), { expiresIn: 60 });
+exports.getPresignedUrl = getPresignedUrl;
 const authTokenVerification = async (token) => {
     try {
         const { data: { session_id: sessionID }, } = await (0, axios_1.default)({

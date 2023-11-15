@@ -12,24 +12,7 @@ import {
   searchDocsSchema,
   returnPresignedURLSchema,
 } from "./schemas";
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
-
-const s3Client = new S3Client({
-  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-  region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
-});
-
-const getPresignedUrl = async (filePath: string) =>
-  getSignedUrl(
-    s3Client,
-    new GetObjectCommand({
-      Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
-      Key: filePath,
-    }),
-    { expiresIn: 6000 }
-  );
+import { getPresignedUrl } from "../routes/helper";
 
 const router = Router();
 
