@@ -48,6 +48,7 @@ export const AuthenticateManageToken =
     const { valid } = await authTokenVerification(authToken);
 
     if (valid) {
+      console.log("Valid Session");
       return next();
     } else {
       return res.send({

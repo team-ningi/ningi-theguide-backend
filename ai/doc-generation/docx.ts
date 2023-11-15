@@ -2,7 +2,8 @@ const PizZip = require("pizzip");
 const Docxtemplater = require("docxtemplater");
 const fs = require("fs");
 const https = require("https");
-import { Errback, Response } from "express";
+import { Errback, Response } from "express"; //@ts-ignore
+import { reportsModel } from "../../routes/db/reports-model";
 import { S3 } from "aws-sdk";
 const path = require("path");
 const s3 = new S3({
@@ -13,41 +14,14 @@ const s3 = new S3({
 
 /* docs : basic.dox  | suitabilityReportTemplate.docx */
 
-/*
-  TODO
-11111111
-  PASS :
-    REPORT ID
-    TEMPLATE URL                > templateToUse
-    FILENAME TO SAVE REPORT AS  > reportOutputName
-
-22222222
-  UPDATE REPORT DB
-    user_id,report_id
-  SET  
-    generated_report_url -> THE S3 URL
-    generated_report     -> TRUE
-
-    const result = await reportsModel.findOneAndUpdate(
-        { _id: report_id },
-        {
-          generated_report_url:
-            generated_report_url || report[0]?.generated_report_url,
-          generated_report: generated_report || report[0]?.generated_report,
-        },
-        {
-          new: true,
-          upsert: false,
-        }
-      );
-*/
-
-export default async (tags: any) => {
+export default async (
+  tags: any,
+  reportId: string,
+  templateURL: string,
+  outputName: string
+) => {
   let content;
   const useLocalFile = false;
-  const templateToUse =
-    "https://aiadvisor-ningi-cdn.s3.eu-west-2.amazonaws.com/615029cc-68d5-4e62-9c98-28b6c432e02f.docx";
-  const reportOutputName = "3test12.docx";
 
   if (useLocalFile) {
     // Load the docx file as binary content
@@ -58,7 +32,7 @@ export default async (tags: any) => {
   }
 
   if (!useLocalFile) {
-    const document_url = templateToUse;
+    const document_url = templateURL;
     const streamName = `/tmp/${Date.now()}.docx`;
 
     const file = fs.createWriteStream(streamName);
@@ -101,14 +75,26 @@ export default async (tags: any) => {
     try {
       const params = {
         Bucket: `${process.env.NEXT_PUBLIC_AWS_BUCKET}`,
-        Key: reportOutputName,
+        Key: outputName,
         Body: buf,
       };
 
       const options = { partSize: 10 * 1024 * 1024, queueSize: 1 };
       const upload = s3.upload(params, options);
       await upload.promise();
-      console.log("finished - update report database");
+
+      await reportsModel.findOneAndUpdate(
+        { _id: reportId },
+        {
+          generated_report_url: `${process.env.NEXT_PUBLIC_AWS_CDN_URL}/${outputName}`,
+          generated_report: true,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+      return;
     } catch {
       console.log("failed to save file to CDN");
     }

@@ -83,6 +83,7 @@ export const addReportSchema = Joi.object({
   report_type: Joi.string().required(),
   file_type: Joi.string().required(),
   tags: Joi.array().required(),
+  tagResults: Joi.object().required(),
   base_template_url: Joi.string().required().allow(""),
   generated_report_url: Joi.string().required().allow(""),
   document_ids: Joi.array().required(),
@@ -101,6 +102,13 @@ export const updateReportSchema = Joi.object({
 export const resetEmbedFlagSchema = Joi.object({
   embed_flag: Joi.boolean().required(),
   document_id: Joi.string().required(),
+});
+
+export const generateDocxSchema = Joi.object({
+  tags: Joi.object().required(),
+  reportId: Joi.string().required(),
+  templateURL: Joi.string().required(),
+  outputName: Joi.string().required(),
 });
 
 export const questionSchema = Joi.object({

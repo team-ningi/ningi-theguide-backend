@@ -10,6 +10,7 @@ import {
   createIndexSchema,
   createEmbeddingsSchema,
   questionSchema,
+  generateDocxSchema,
 } from "./schemas";
 import TextLoader from "../ai/textloader";
 import AudioLoader from "../ai/audioloader";
@@ -213,21 +214,10 @@ router.post(
   AuthenticateManageToken(),
   async (req, res) => {
     try {
-      // await questionSchema.validateAsync(req.body);
-      // const { question, documentIds } = req.body;
-      const tags = req.body.tags;
-      /*
-        TODO
-        
-       PASS THIS IN TO   
-        REPORT ID
-        TEMPLATE URL                > templateToUse
-        FILENAME TO SAVE REPORT AS  > reportOutputName
-       
-        GenerateDocx(tags,reportName,templateURL, OutputName)   :
-      */
+      await generateDocxSchema.validateAsync(req.body);
+      const { tags, reportId, templateURL, outputName } = req.body;
 
-      GenerateDocx(tags);
+      await GenerateDocx(tags, reportId, templateURL, outputName);
 
       return res.json({
         msg: "doc generated",
