@@ -67,6 +67,7 @@ const AuthenticateManageToken = () => async (req, res, next) => {
     const authToken = req.get("engageSession") || "";
     const { valid } = await (0, exports.authTokenVerification)(authToken);
     if (valid) {
+        console.log("Valid Session");
         return next();
     }
     else {

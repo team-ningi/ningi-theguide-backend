@@ -105,10 +105,9 @@ router.post("/v1/aiadviser/add-tags", (0, nocache_1.default)(), (0, helper_1.Aut
 router.put("/v1/aiadviser/update-tags", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
         await schemas_1.updateTagsSchema.validateAsync(req.body);
-        const { id, label, first_name, tags, metadata } = req.body;
-        const result = await usersModel.findOneAndUpdate({ _id: id }, {
+        const { id, label, tags, metadata = {} } = req.body;
+        const result = await tags_model_1.tagsModel.findOneAndUpdate({ _id: id }, {
             label,
-            first_name,
             tags,
             metadata: metadata,
         }, {
@@ -121,7 +120,7 @@ router.put("/v1/aiadviser/update-tags", (0, nocache_1.default)(), (0, helper_1.A
         console.log(e);
         return res.json({
             error: true,
-            msg: "failed to insert tags",
+            msg: "failed to update tags",
         });
     }
 });

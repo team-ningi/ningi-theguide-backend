@@ -150,20 +150,9 @@ router.post("/v1/aiadviser/create-index", (0, nocache_1.default)(), (0, helper_1
 //doc gen
 router.post("/v1/aiadviser/docx-generation", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
-        // await questionSchema.validateAsync(req.body);
-        // const { question, documentIds } = req.body;
-        const tags = req.body.tags;
-        /*
-          TODO
-          
-         PASS THIS IN TO
-          REPORT ID
-          TEMPLATE URL                > templateToUse
-          FILENAME TO SAVE REPORT AS  > reportOutputName
-         
-          GenerateDocx(tags,reportName,templateURL, OutputName)   :
-        */
-        (0, docx_1.default)(tags);
+        await schemas_1.generateDocxSchema.validateAsync(req.body);
+        const { tags, reportId, templateURL, outputName } = req.body;
+        await (0, docx_1.default)(tags, reportId, templateURL, outputName);
         return res.json({
             msg: "doc generated",
         });

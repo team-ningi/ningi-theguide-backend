@@ -235,7 +235,7 @@ router.post("/v1/aiadviser/return-presigned-url", (0, nocache_1.default)(), (0, 
         await schemas_1.returnPresignedURLSchema.validateAsync(req.body);
         const { file } = req.body;
         const signedURL = await getPresignedUrl(file);
-        // console.log(signedURL);
+        console.log(signedURL);
         return res.json({
             signedURL,
         });

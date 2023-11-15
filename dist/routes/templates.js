@@ -44,7 +44,6 @@ router.post("/v1/aiadviser/search-templates", (0, nocache_1.default)(), (0, help
         if (file_type) {
             searchQuery = { ...searchQuery, file_type };
         }
-        //TODO -> PASS IN USER ID
         /*
           example with all options
           {

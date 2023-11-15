@@ -307,7 +307,7 @@ router.post(
       const { file } = req.body;
 
       const signedURL = await getPresignedUrl(file);
-      // console.log(signedURL);
+      console.log(signedURL);
       return res.json({
         signedURL,
       });
