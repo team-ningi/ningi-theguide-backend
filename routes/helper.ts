@@ -8,8 +8,10 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const s3Client = new S3Client({
-  accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+  credentials: {
+    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+  },
   region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
 export const getPresignedUrl = async (filePath: string) =>
