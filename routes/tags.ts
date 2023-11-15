@@ -139,13 +139,12 @@ router.put(
     try {
       await updateTagsSchema.validateAsync(req.body);
 
-      const { id, label, first_name, tags, metadata } = req.body;
+      const { id, label, tags, metadata = {} } = req.body;
 
-      const result = await usersModel.findOneAndUpdate(
+      const result = await tagsModel.findOneAndUpdate(
         { _id: id },
         {
           label,
-          first_name,
           tags,
           metadata: metadata,
         },
@@ -160,7 +159,7 @@ router.put(
       console.log(e);
       return res.json({
         error: true,
-        msg: "failed to insert tags",
+        msg: "failed to update tags",
       });
     }
   }

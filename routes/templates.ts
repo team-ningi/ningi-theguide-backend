@@ -58,7 +58,6 @@ router.post(
       if (file_type) {
         searchQuery = { ...searchQuery, file_type };
       }
-      //TODO -> PASS IN USER ID
       /*
         example with all options
         {
