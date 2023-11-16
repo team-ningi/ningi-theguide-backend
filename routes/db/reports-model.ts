@@ -13,7 +13,7 @@ const reportsSchema = new mongoose.Schema(
     base_template_url: { type: String },
     generated_report_url: { type: String },
     tags: { type: Array },
-    tagResults: { type: Array },
+    tagResults: { type: Object },
     document_ids: { type: Array },
     report_hidden: { type: Boolean, default: false },
     generated_report: { type: Boolean, default: false },
