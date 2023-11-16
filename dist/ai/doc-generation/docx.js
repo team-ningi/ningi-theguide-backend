@@ -5,11 +5,14 @@ const Docxtemplater = require("docxtemplater");
 const fs = require("fs");
 const https = require("https");
 const reports_model_1 = require("../../routes/db/reports-model");
-const aws_sdk_1 = require("aws-sdk");
 const path = require("path");
-const s3 = new aws_sdk_1.S3({
-    accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const helper_1 = require("../../routes/helper");
+const s3Client = new S3Client({
+    credentials: {
+        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
+    },
     region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
 /* docs : basic.dox  | suitabilityReportTemplate.docx */
@@ -21,7 +24,7 @@ exports.default = async (tags, reportId, templateURL, outputName) => {
         content = fs.readFileSync(path.resolve(__dirname, "suitabilityReportTemplate.docx"), "binary");
     }
     if (!useLocalFile) {
-        const document_url = templateURL;
+        const document_url = await (0, helper_1.getPresignedUrl)(`${templateURL}`); //document_url
         const streamName = `/tmp/${Date.now()}.docx`;
         const file = fs.createWriteStream(streamName);
         content = await new Promise((resolve, reject) => {
@@ -61,11 +64,10 @@ exports.default = async (tags, reportId, templateURL, outputName) => {
                 Key: outputName,
                 Body: buf,
             };
-            const options = { partSize: 10 * 1024 * 1024, queueSize: 1 };
-            const upload = s3.upload(params, options);
-            await upload.promise();
+            const command = new PutObjectCommand(params);
+            await s3Client.send(command);
             await reports_model_1.reportsModel.findOneAndUpdate({ _id: reportId }, {
-                generated_report_url: `${process.env.NEXT_PUBLIC_AWS_CDN_URL}/${outputName}`,
+                generated_report_url: `${outputName}`,
                 generated_report: true,
             }, {
                 new: true,
