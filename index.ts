@@ -12,6 +12,7 @@ import tagsRoutes from "./routes/tags";
 import reportRoutes from "./routes/reports";
 import aiRoutes from "./routes/ai";
 import historyRoutes from "./routes/history";
+import testRoutes from "./routes/testroutes";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use(tagsRoutes);
 app.use(aiRoutes);
 app.use(historyRoutes);
 app.use(reportRoutes);
+app.use(testRoutes);
 
 app.listen(port, () => {
   console.log(`Listening on port: ${port}`);

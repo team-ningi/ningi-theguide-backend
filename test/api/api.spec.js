@@ -1,111 +1,290 @@
-// /* eslint-disable */
-// const request = require("supertest");
-// const express = require("express");
-// const { json } = require("body-parser");
-// const dotenv = require("dotenv");
-// dotenv.config();
+/* eslint-disable */
+const request = require("supertest");
+const express = require("express");
+const { json } = require("body-parser");
+const dotenv = require("dotenv");
+dotenv.config();
 
-// require("../../setup").setup();
-// import userRoutes from "./../../routes/users";
-// import contentRoutes from "./../../routes/content";
-// import likeRoutes from "./../../routes/likes";
-// import commentRoutes from "./../../routes/comments";
-// import siteConfigRoutes from "./../../routes/site-config";
-// import testRoutes from "./../../routes/testroutes";
+require("../../setup").setup();
+import userRoutes from "./../../routes/users";
+import documentRoutes from "./../../routes/documents";
+import templateRoutes from "./../../routes/templates";
+import tagsRoutes from "./../../routes/tags";
+import reportRoutes from "./../../routes/reports";
+import testRoutes from "./../../routes/testroutes";
 
-// const app = express();
-// app.use(json());
+const app = express();
+app.use(json());
 
-// app.use(userRoutes);
-// app.use(contentRoutes);
-// app.use(likeRoutes);
-// app.use(commentRoutes);
-// app.use(siteConfigRoutes);
-// app.use(testRoutes);
+app.use(userRoutes);
+app.use(documentRoutes);
+app.use(templateRoutes);
+app.use(tagsRoutes);
+app.use(reportRoutes);
+app.use(testRoutes);
 
-// afterAll(async () => {
-//   await request(app).post("/v1/admin/teardown");
-// }, 30000);
+beforeAll(async () => {
+  await request(app).post("/v1/admin/teardown");
+}, 30000);
 
-// describe("API routes", () => {
-//   test("create like and check count", async () => {
-//     expect.assertions(4);
-//     const res = await request(app).post("/v1/community/create-like").send({
-//       user_id: "test",
-//       content_id: "123test",
-//       content_type: "tests",
-//     });
+afterAll(async () => {
+  await request(app).post("/v1/admin/teardown");
+}, 30000);
 
-//     const res2 = await request(app)
-//       .post("/v1/community/count-likes-by-id")
-//       .send({
-//         content_id: "123test",
-//       });
+const userID = "test";
 
-//     const theCount = JSON.parse(res2.text);
-//     expect(theCount.count).toBe(1);
-//     expect(res2.status).toBe(200);
+describe("API routes", () => {
+  test("create like and check count", async () => {
+    expect(1).toBe(1);
+  });
 
-//     expect(res.status).toBe(200);
-//     const theMsg = JSON.parse(res.text);
-//     expect(theMsg.msg).toBe("like added");
-//   });
+  /*DOCUMENTS */
+  test("create a document entry", async () => {
+    expect.assertions(5);
+    const res = await request(app).post("/v1/aiadviser/add-document").send({
+      user_id: userID,
+      label: "my test file",
+      file_url: "http://google.com/doesnt-exist",
+      file_type: "docx",
+      original_filename: "theFile.docx",
+      saved_filename: "123456789.docx",
+      custom_filename: "",
+      metadata: {},
+    });
 
-//   test("create comment", async () => {
-//     expect.assertions(2);
-//     const res = await request(app).post("/v1/community/create-comment").send({
-//       user_id: "test",
-//       content_id: "123test",
-//       content_type: "tests",
-//       comment: "this is a test",
-//     });
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg.msg).toBe("document data added");
+    expect(theMsg.error).toBe(false);
+    expect(theMsg.document.user_id).toBe(userID);
+    expect(theMsg.document.embedding_created).toBe(false);
+  });
 
-//     expect(res.status).toBe(200);
-//     const theMsg = JSON.parse(res.text);
-//     expect(theMsg.msg).toBe("comment added");
-//   });
+  test("get the new document entry", async () => {
+    expect.assertions(2);
+    const res = await request(app)
+      .post("/v1/aiadviser/get-documents-by-userid")
+      .send({
+        user_id: userID,
+        embedded: false,
+      });
 
-//   test("create content", async () => {
-//     expect.assertions(2);
-//     const res = await request(app).post("/v1/community/create-content").send({
-//       author: "test author",
-//       user_id: "test",
-//       title: "the testing title",
-//       type: "tests",
-//       image_url: "http://idontexist.com/image.png",
-//       content: "<div><p>Hello this is my content</p></div>",
-//     });
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg[0].saved_filename).toBe("123456789.docx");
+  });
 
-//     expect(res.status).toBe(200);
-//     const theMsg = JSON.parse(res.text);
-//     expect(theMsg.msg).toBe("content added");
-//   });
+  test("search for the new document entry", async () => {
+    expect.assertions(2);
+    const res = await request(app).post("/v1/aiadviser/search-documents").send({
+      user_id: userID,
+      embedded: false,
+      search: "test file",
+      skip: 0,
+      limit: 10,
+    });
 
-//   test("failure to create like", async () => {
-//     expect.assertions(1);
-//     const res = await request(app).post("/v1/community/create-like").send({});
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg[0].saved_filename).toBe("123456789.docx");
+  });
 
-//     const theMsg = JSON.parse(res.text);
-//     expect(theMsg.msg).toBe("failed to insert like");
-//   });
+  test("FAIL to create a document entry", async () => {
+    expect.assertions(2);
+    const res = await request(app).post("/v1/aiadviser/add-document").send({
+      user_id: userID,
+      metadata: {},
+    });
 
-//   test("failure to create comment", async () => {
-//     expect.assertions(1);
-//     const res = await request(app)
-//       .post("/v1/community/create-comment")
-//       .send({});
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg.msg).toBe("failed to insert document data");
+    expect(theMsg.error).toBe(true);
+  });
 
-//     const theMsg = JSON.parse(res.text);
-//     expect(theMsg.msg).toBe("failed to insert comment");
-//   });
+  /*TEMPLATES */
+  test("create a template entry", async () => {
+    expect.assertions(4);
+    const res = await request(app).post("/v1/aiadviser/add-template").send({
+      user_id: userID,
+      label: "my test file",
+      file_url: "http://google.com/doesnt-exist",
+      file_type: "docx",
+      original_filename: "theFile.docx",
+      saved_filename: "123456789.docx",
+      custom_filename: "",
+      metadata: {},
+    });
 
-//   test("failure to create content", async () => {
-//     expect.assertions(1);
-//     const res = await request(app)
-//       .post("/v1/community/create-content")
-//       .send({});
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg.msg).toBe("template data added");
+    expect(theMsg.error).toBe(false);
+    expect(theMsg.template.user_id).toBe(userID);
+  });
 
-//     const theMsg = JSON.parse(res.text);
-//     expect(theMsg.msg).toBe("failed to insert content");
-//   });
-// });
+  test("get the new template entry", async () => {
+    expect.assertions(2);
+    const res = await request(app)
+      .post("/v1/aiadviser/get-templates-by-userid")
+      .send({
+        user_id: userID,
+      });
+
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg[0].saved_filename).toBe("123456789.docx");
+  });
+
+  test("search for the new template entry", async () => {
+    expect.assertions(2);
+    const res = await request(app).post("/v1/aiadviser/search-templates").send({
+      user_id: userID,
+      search: "test file",
+      skip: 0,
+      limit: 10,
+    });
+
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg[0].saved_filename).toBe("123456789.docx");
+  });
+
+  test("FAIL to create a template entry", async () => {
+    expect.assertions(2);
+    const res = await request(app).post("/v1/aiadviser/add-template").send({
+      user_id: userID,
+      label: "my test file2",
+      metadata: {},
+    });
+
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg.msg).toBe("failed to insert template data");
+    expect(theMsg.error).toBe(true);
+  });
+
+  /*TAGS*/
+  test("create a tag entry", async () => {
+    expect.assertions(4);
+    const res = await request(app)
+      .post("/v1/aiadviser/add-tags")
+      .send({
+        user_id: userID,
+        label: "my test tags",
+        tags: [
+          {
+            tag: "first_name",
+            data: "first name",
+            prompt: "return {{data}} only with no other text",
+            uuid: "987754456567656",
+          },
+        ],
+        metadata: {},
+      });
+
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg.msg).toBe("tags data added");
+    expect(theMsg.error).toBe(false);
+    expect(theMsg.tags.user_id).toBe(userID);
+  });
+
+  test("get the new tags entry", async () => {
+    expect.assertions(2);
+    const res = await request(app)
+      .post("/v1/aiadviser/get-tags-by-userid")
+      .send({
+        user_id: userID,
+      });
+
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg[0].label).toBe("my test tags");
+  });
+
+  test("FAIL to create a tags entry", async () => {
+    expect.assertions(2);
+    const res = await request(app)
+      .post("/v1/aiadviser/add-tags")
+      .send({ user_id: userID, metadata: {} });
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg.msg).toBe("failed to insert tags");
+    expect(theMsg.error).toBe(true);
+  });
+
+  /*REPORTS*/
+  test("create a report entry", async () => {
+    expect.assertions(5);
+    const res = await request(app)
+      .post("/v1/aiadviser/add-report")
+      .send({
+        user_id: userID,
+        report_name: "test report",
+        report_type: "standard",
+        file_type: "docx",
+        tags: [
+          {
+            tag: "first_name",
+            data: "first name",
+            prompt: "return {{data}} only with no other text",
+            uuid: "987754456567656",
+          },
+        ],
+        tagResults: {
+          first_name: "Gary",
+        },
+        base_template_url: "i_dont_exist.docx",
+        generated_report_url: "i_dont_exist.docx",
+        generated_report: true,
+        document_ids: ["123", "456"],
+        report_hidden: false,
+        metadata: {},
+      });
+
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg.msg).toBe("report data added");
+    expect(theMsg.error).toBe(false);
+    expect(theMsg.report.user_id).toBe(userID);
+    expect(theMsg.report.report_name).toBe("test report");
+  });
+
+  test("get the new report entry", async () => {
+    expect.assertions(2);
+    const res = await request(app)
+      .post("/v1/aiadviser/get-reports-by-userid")
+      .send({
+        user_id: userID,
+      });
+
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg[0].report_name).toBe("test report");
+  });
+
+  test("search for the new report entry", async () => {
+    expect.assertions(2);
+    const res = await request(app).post("/v1/aiadviser/search-reports").send({
+      user_id: userID,
+      search: "test report",
+      report_type: "standard",
+      skip: 0,
+      limit: 10,
+    });
+
+    expect(res.status).toBe(200);
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg[0].report_name).toBe("test report");
+  });
+
+  test("FAIL to create a report entry", async () => {
+    expect.assertions(2);
+    const res = await request(app).post("/v1/aiadviser/add-report").send({
+      user_id: userID,
+      metadata: {},
+    });
+
+    const theMsg = JSON.parse(res.text);
+    expect(theMsg.msg).toBe("failed to insert report data");
+    expect(theMsg.error).toBe(true);
+  });
+});

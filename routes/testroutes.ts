@@ -2,9 +2,14 @@
 import { Router } from "express";
 import nocache from "nocache";
 import { usersModel } from "./db/users-model";
+import { documentModel } from "./db/document-model";
+import { templateModel } from "./db/template-model";
+import { tagsModel } from "./db/tags-model";
+import { reportsModel } from "./db/reports-model";
 import usersCreator from "./db/users-creator";
 
 const router = Router();
+const userID = "test";
 
 router.post("/v1/admin/create-user", nocache(), async (req, res) => {
   try {
@@ -60,17 +65,22 @@ router.post("/v1/admin/create-user", nocache(), async (req, res) => {
 router.post("/v1/admin/teardown", nocache(), async (req, res) => {
   try {
     console.log("teardown started");
-    // await likesModel.deleteMany({
-    //   content_type: "tests",
-    // });
 
-    // await commentsModel.deleteMany({
-    //   content_type: "tests",
-    // });
+    await documentModel.deleteMany({
+      user_id: userID,
+    });
 
-    // await contentModel.deleteMany({
-    //   type: "tests",
-    // });
+    await templateModel.deleteMany({
+      user_id: userID,
+    });
+
+    await tagsModel.deleteMany({
+      user_id: userID,
+    });
+
+    await reportsModel.deleteMany({
+      user_id: userID,
+    });
 
     await usersModel.findOneAndRemove({
       uuid: "test12345",
