@@ -17,6 +17,7 @@ const tags_1 = __importDefault(require("./routes/tags"));
 const reports_1 = __importDefault(require("./routes/reports"));
 const ai_1 = __importDefault(require("./routes/ai"));
 const history_1 = __importDefault(require("./routes/history"));
+const testroutes_1 = __importDefault(require("./routes/testroutes"));
 dotenv_1.default.config();
 require("./setup").setup();
 const app = (0, express_1.default)();
@@ -36,6 +37,7 @@ app.use(tags_1.default);
 app.use(ai_1.default);
 app.use(history_1.default);
 app.use(reports_1.default);
+app.use(testroutes_1.default);
 app.listen(port, () => {
     console.log(`Listening on port: ${port}`);
 });

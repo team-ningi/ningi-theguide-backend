@@ -7,8 +7,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const nocache_1 = __importDefault(require("nocache"));
 const users_model_1 = require("./db/users-model");
+const document_model_1 = require("./db/document-model");
+const template_model_1 = require("./db/template-model");
+const tags_model_1 = require("./db/tags-model");
+const reports_model_1 = require("./db/reports-model");
 const users_creator_1 = __importDefault(require("./db/users-creator"));
 const router = (0, express_1.Router)();
+const userID = "test";
 router.post("/v1/admin/create-user", (0, nocache_1.default)(), async (req, res) => {
     try {
         const { email_address } = req.body;
@@ -54,15 +59,18 @@ router.post("/v1/admin/create-user", (0, nocache_1.default)(), async (req, res) 
 router.post("/v1/admin/teardown", (0, nocache_1.default)(), async (req, res) => {
     try {
         console.log("teardown started");
-        // await likesModel.deleteMany({
-        //   content_type: "tests",
-        // });
-        // await commentsModel.deleteMany({
-        //   content_type: "tests",
-        // });
-        // await contentModel.deleteMany({
-        //   type: "tests",
-        // });
+        await document_model_1.documentModel.deleteMany({
+            user_id: userID,
+        });
+        await template_model_1.templateModel.deleteMany({
+            user_id: userID,
+        });
+        await tags_model_1.tagsModel.deleteMany({
+            user_id: userID,
+        });
+        await reports_model_1.reportsModel.deleteMany({
+            user_id: userID,
+        });
         await users_model_1.usersModel.findOneAndRemove({
             uuid: "test12345",
         });
