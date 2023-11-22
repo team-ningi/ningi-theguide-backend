@@ -239,8 +239,11 @@ router.post(
         original_filename: req.body.original_filename,
         saved_filename: req.body.saved_filename,
         custom_filename: req.body.custom_filename,
+        additional_context: req.body.additional_context,
+        type_of_embedding: req.body.type_of_embedding,
         metadata: req.body.metadata || {},
       };
+
       const document = await documentCreator(newContent);
 
       return res.json({

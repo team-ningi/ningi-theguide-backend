@@ -44,6 +44,8 @@ export const addHistorySchema = Joi.object({
 export const addDocumentSchema = Joi.object({
   user_id: Joi.string().required(),
   label: Joi.string().required().allow(""),
+  additional_context: Joi.string().optional().allow(""),
+  type_of_embedding: Joi.string().required(), // image | document
   file_url: Joi.string().required(),
   file_type: Joi.string().required(),
   saved_filename: Joi.string().required(),
@@ -139,6 +141,8 @@ export const createIndexSchema = Joi.object({
 });
 
 export const createEmbeddingsSchema = Joi.object({
+  additional_context: Joi.string().optional().allow(""),
+  type_of_embedding: Joi.string().required(), // image | document
   user_id: Joi.string().required(),
   document_url: Joi.string().required(),
   document_id: Joi.string().required(),

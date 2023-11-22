@@ -109,7 +109,14 @@ router.post(
   async (req, res) => {
     try {
       await createEmbeddingsSchema.validateAsync(req.body);
-      const { user_id, document_url, document_id, file_type } = req.body;
+      const {
+        user_id,
+        document_url,
+        document_id,
+        file_type,
+        additional_context,
+        type_of_embedding,
+      } = req.body;
 
       const data = await documentModel
         .find({
@@ -139,7 +146,7 @@ router.post(
 
         let result;
 
-        if (["docx", "txt", "pdf"].includes(file_type)) {
+        if (type_of_embedding === "document") {
           result = await createEmbeddings(
             client,
             process.env.PINECONE_INDEX_NAME,
@@ -149,9 +156,7 @@ router.post(
             file_type,
             data[0]?.saved_filename
           );
-        } else if (["png", "jpg", "jpeg"].includes(file_type)) {
-          console.log("create textract embedding for PNG");
-
+        } else if (type_of_embedding === "image") {
           result = await createImageEmbeddings(
             client,
             process.env.PINECONE_INDEX_NAME,
@@ -159,14 +164,11 @@ router.post(
             document_url,
             document_id,
             file_type,
-            data[0]?.saved_filename
+            data[0]?.saved_filename,
+            additional_context
           );
 
-          console.log("result ? ...", result);
-          // return res.json({
-          //   error: true,
-          //   msg: "we need textract",
-          // });
+          console.log("textract = ", result);
         }
 
         if (!result) {

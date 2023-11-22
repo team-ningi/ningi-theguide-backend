@@ -33,9 +33,9 @@ export default async (
   document_url: string,
   document_id: string,
   file_type: string,
-  saved_filename: string
+  saved_filename: string,
+  additionalContext: string
 ) => {
-  //* StartDocumentAnalysisCommand
   const params = {
     DocumentLocation: {
       S3Object: {
@@ -52,7 +52,7 @@ export default async (
   const getDocumentAnalysis = async (jobId: string) => {
     const getCommand = new GetDocumentAnalysisCommand({ JobId: jobId });
     // @ts-ignore
-    let words = [];
+    let words = [`${additionalContext} .`];
 
     while (true) {
       try {
@@ -61,7 +61,6 @@ export default async (
         console.log("Job Status:", data.JobStatus);
 
         if (data.JobStatus === "SUCCEEDED") {
-          // Process the extracted text results here
           data.Blocks.forEach((block: any) => {
             if (block.BlockType === "WORD") {
               console.log("word : ", block.Text);
@@ -140,9 +139,12 @@ export default async (
     .catch((error: any) => {
       console.error(error);
     });
-  // */
+};
 
-  /* StartDocumentTextDetectionCommand
+//
+// Alternative way to use AWS textract >
+// if ever needed just replace entire body of the function above
+/* StartDocumentTextDetectionCommand
 
   const params = {
     DocumentLocation: {
@@ -158,7 +160,7 @@ export default async (
   const checkJobStatus = async (jobId: string) => {
     const getCommand = new GetDocumentTextDetectionCommand({ JobId: jobId });
     // @ts-ignore
-    let words = [];
+    let words = [`${additionalContext} .`];
 
     while (true) {
       try {
@@ -246,4 +248,3 @@ export default async (
       console.error(error);
     });
   // */
-};
