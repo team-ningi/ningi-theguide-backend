@@ -13,6 +13,7 @@ const schemas_1 = require("./schemas");
 const textloader_1 = __importDefault(require("../ai/textloader"));
 const audioloader_1 = __importDefault(require("../ai/audioloader"));
 const createEmbeddings_1 = __importDefault(require("../ai/createEmbeddings"));
+const createImageEmbeddings_1 = __importDefault(require("../ai/createImageEmbeddings"));
 const createIndex_1 = __importDefault(require("../ai/pinecone/createIndex"));
 const queryPinecone_1 = require("../ai/pinecone/queryPinecone");
 const docx_1 = __importDefault(require("../ai/doc-generation/docx"));
@@ -100,11 +101,23 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
             })
                 .lean()
                 .exec();
-            const result = await (0, createEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename);
+            let result;
+            if (["docx", "txt", "pdf"].includes(file_type)) {
+                result = await (0, createEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename);
+            }
+            else if (["png", "jpg", "jpeg"].includes(file_type)) {
+                console.log("create textract embedding for PNG");
+                result = await (0, createImageEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename);
+                console.log("result ? ...", result);
+                // return res.json({
+                //   error: true,
+                //   msg: "we need textract",
+                // });
+            }
             if (!result) {
                 return res.json({
                     error: true,
-                    msg: "failed to read file",
+                    msg: "failed to EMBED file",
                 });
             }
             await document_model_1.documentModel.findOneAndUpdate({ _id: document_id }, {
