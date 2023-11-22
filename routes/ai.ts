@@ -15,6 +15,7 @@ import {
 import TextLoader from "../ai/textloader";
 import AudioLoader from "../ai/audioloader";
 import createEmbeddings from "../ai/createEmbeddings";
+import createImageEmbeddings from "../ai/createImageEmbeddings";
 import createIndex from "../ai/pinecone/createIndex";
 import { queryPineconeVectorStoreAndQueryLLM } from "../ai/pinecone/queryPinecone";
 import GenerateDocx from "../ai/doc-generation/docx";
@@ -136,20 +137,42 @@ router.post(
           .lean()
           .exec();
 
-        const result = await createEmbeddings(
-          client,
-          process.env.PINECONE_INDEX_NAME,
-          user_id,
-          document_url,
-          document_id,
-          file_type,
-          data[0]?.saved_filename
-        );
+        let result;
+
+        if (["docx", "txt", "pdf"].includes(file_type)) {
+          result = await createEmbeddings(
+            client,
+            process.env.PINECONE_INDEX_NAME,
+            user_id,
+            document_url,
+            document_id,
+            file_type,
+            data[0]?.saved_filename
+          );
+        } else if (["png", "jpg", "jpeg"].includes(file_type)) {
+          console.log("create textract embedding for PNG");
+
+          result = await createImageEmbeddings(
+            client,
+            process.env.PINECONE_INDEX_NAME,
+            user_id,
+            document_url,
+            document_id,
+            file_type,
+            data[0]?.saved_filename
+          );
+
+          console.log("result ? ...", result);
+          // return res.json({
+          //   error: true,
+          //   msg: "we need textract",
+          // });
+        }
 
         if (!result) {
           return res.json({
             error: true,
-            msg: "failed to read file",
+            msg: "failed to EMBED file",
           });
         }
 

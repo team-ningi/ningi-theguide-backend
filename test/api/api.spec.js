@@ -34,10 +34,6 @@ afterAll(async () => {
 const userID = "test";
 
 describe("API routes", () => {
-  test("create like and check count", async () => {
-    expect(1).toBe(1);
-  });
-
   /*DOCUMENTS */
   test("create a document entry", async () => {
     expect.assertions(5);
