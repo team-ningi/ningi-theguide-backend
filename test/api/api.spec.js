@@ -45,6 +45,8 @@ describe("API routes", () => {
       original_filename: "theFile.docx",
       saved_filename: "123456789.docx",
       custom_filename: "",
+      type_of_embedding: "document",
+      additional_context: "",
       metadata: {},
     });
 
