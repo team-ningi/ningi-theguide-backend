@@ -51,15 +51,15 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
             };
         }
         const result = await (0, queryPinecone_1.queryPineconeVectorStoreAndQueryLLM)(client, process.env.PINECONE_INDEX_NAME, question, filterQuery);
-        const auditData = {
-            action: "query documents",
-            metadata: {
-                question,
-                answer: `${result}`,
-                documentIds,
-            },
-        };
-        await (0, helper_1.addToAudit)(req, auditData);
+        // const auditData = {
+        //   action: "query documents",
+        //   metadata: {
+        //     question,
+        //     answer: `${result}`,
+        //     documentIds,
+        //   },
+        // };
+        // await addToAudit(req, auditData);
         return res.json({
             question,
             answer: `${result}`,

@@ -78,15 +78,15 @@ router.post(
         filterQuery
       );
 
-      const auditData = {
-        action: "query documents",
-        metadata: {
-          question,
-          answer: `${result}`,
-          documentIds,
-        },
-      };
-      await addToAudit(req, auditData);
+      // const auditData = {
+      //   action: "query documents",
+      //   metadata: {
+      //     question,
+      //     answer: `${result}`,
+      //     documentIds,
+      //   },
+      // };
+      // await addToAudit(req, auditData);
 
       return res.json({
         question,

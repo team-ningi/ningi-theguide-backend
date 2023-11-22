@@ -123,15 +123,15 @@ router.put(
         }
       );
 
-      const auditData = {
-        user_id: user[0]?._id,
-        action: "update_user",
-        metadata: {
-          uuid,
-          metadata: metadata || user[0]?.metadata,
-        },
-      };
-      await addToAudit(req, auditData);
+      // const auditData = {
+      //   user_id: user[0]?._id,
+      //   action: "update_user",
+      //   metadata: {
+      //     uuid,
+      //     metadata: metadata || user[0]?.metadata,
+      //   },
+      // };
+      // await addToAudit(req, auditData);
 
       res.json(result);
     } catch (e) {
