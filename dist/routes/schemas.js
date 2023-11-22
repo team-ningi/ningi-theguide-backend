@@ -43,6 +43,8 @@ exports.addHistorySchema = joi_1.default.object({
 exports.addDocumentSchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
     label: joi_1.default.string().required().allow(""),
+    additional_context: joi_1.default.string().optional().allow(""),
+    type_of_embedding: joi_1.default.string().required(),
     file_url: joi_1.default.string().required(),
     file_type: joi_1.default.string().required(),
     saved_filename: joi_1.default.string().required(),
@@ -124,6 +126,8 @@ exports.createIndexSchema = joi_1.default.object({
     vector_dimension: joi_1.default.number().required(),
 });
 exports.createEmbeddingsSchema = joi_1.default.object({
+    additional_context: joi_1.default.string().optional().allow(""),
+    type_of_embedding: joi_1.default.string().required(),
     user_id: joi_1.default.string().required(),
     document_url: joi_1.default.string().required(),
     document_id: joi_1.default.string().required(),

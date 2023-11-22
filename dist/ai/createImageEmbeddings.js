@@ -16,8 +16,7 @@ const textract = new TextractClient({
     region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
 const page = "1";
-exports.default = async (client, indexName, user_id, document_url, document_id, file_type, saved_filename) => {
-    //* StartDocumentAnalysisCommand
+exports.default = async (client, indexName, user_id, document_url, document_id, file_type, saved_filename, additionalContext) => {
     const params = {
         DocumentLocation: {
             S3Object: {
@@ -32,13 +31,12 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
     const getDocumentAnalysis = async (jobId) => {
         const getCommand = new GetDocumentAnalysisCommand({ JobId: jobId });
         // @ts-ignore
-        let words = [];
+        let words = [`${additionalContext} .`];
         while (true) {
             try {
                 const data = await textract.send(getCommand);
                 console.log("Job Status:", data.JobStatus);
                 if (data.JobStatus === "SUCCEEDED") {
-                    // Process the extracted text results here
                     data.Blocks.forEach((block) => {
                         if (block.BlockType === "WORD") {
                             console.log("word : ", block.Text);
@@ -109,109 +107,111 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
         .catch((error) => {
         console.error(error);
     });
-    // */
-    /* StartDocumentTextDetectionCommand
-  
-    const params = {
-      DocumentLocation: {
-        S3Object: {
-          Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
-          Name: saved_filename,
-        },
+};
+//
+// Alternative way to use AWS textract >
+// if ever needed just replace entire body of the function above
+/* StartDocumentTextDetectionCommand
+
+  const params = {
+    DocumentLocation: {
+      S3Object: {
+        Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
+        Name: saved_filename,
       },
-    };
-  
-    const startCommand = new StartDocumentTextDetectionCommand(params);
-  
-    const checkJobStatus = async (jobId: string) => {
-      const getCommand = new GetDocumentTextDetectionCommand({ JobId: jobId });
-      // @ts-ignore
-      let words = [];
-  
-      while (true) {
-        try {
-          const data = await textract.send(getCommand);
-  
-          console.log("Job Status:", data.JobStatus);
-  
-          if (data.JobStatus === "SUCCEEDED") {
-            // Process the extracted text results here
-            data.Blocks.forEach((block: any) => {
-              if (block.BlockType === "WORD") {
-                words.push(block.Text);
-              }
-            });
-  
-            if (data.NextToken) {
-              // If there is a NextToken, call GetDocumentTextDetectionCommand again with the NextToken
-              getCommand.NextToken = data.NextToken;
-            } else {
-              break; // Exit the loop when all pages have been processed
+    },
+  };
+
+  const startCommand = new StartDocumentTextDetectionCommand(params);
+
+  const checkJobStatus = async (jobId: string) => {
+    const getCommand = new GetDocumentTextDetectionCommand({ JobId: jobId });
+    // @ts-ignore
+    let words = [`${additionalContext} .`];
+
+    while (true) {
+      try {
+        const data = await textract.send(getCommand);
+
+        console.log("Job Status:", data.JobStatus);
+
+        if (data.JobStatus === "SUCCEEDED") {
+          // Process the extracted text results here
+          data.Blocks.forEach((block: any) => {
+            if (block.BlockType === "WORD") {
+              words.push(block.Text);
             }
-          } else if (data.JobStatus === "FAILED") {
-            console.log("Text extraction failed");
-            break;
+          });
+
+          if (data.NextToken) {
+            // If there is a NextToken, call GetDocumentTextDetectionCommand again with the NextToken
+            getCommand.NextToken = data.NextToken;
+          } else {
+            break; // Exit the loop when all pages have been processed
           }
-  
-          await new Promise((resolve) => setTimeout(resolve, 5000)); // Check job status every 5 seconds
-        } catch (error) {
-          console.error(error);
+        } else if (data.JobStatus === "FAILED") {
+          console.log("Text extraction failed");
           break;
         }
-      }
-      // @ts-ignore
-      const theResult = words.join(" ");
-      console.log("the result ", theResult);
-  
-      const index = client.Index(indexName);
-      const txtPath = "image file";
-      const text = theResult;
-  
-      const textSplitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000,
-      });
-  
-      const chunks = await textSplitter.createDocuments([text]);
-      const embeddingsArrays = await new OpenAIEmbeddings().embedDocuments(
-        chunks.map((chunk) => chunk.pageContent.replace(/\n/g, " "))
-      );
-  
-      const batchSize = 100;
-      let batch = [];
-      for (let idx = 0; idx < chunks.length; idx++) {
-        const chunk = chunks[idx];
-        const vector = {
-          id: `${txtPath}_${idx}`,
-          values: embeddingsArrays[idx],
-          metadata: {
-            ...chunk.metadata,
-            loc: JSON.stringify(chunk.metadata.loc),
-            pageContent: chunk.pageContent,
-            user_id,
-            document_id,
-            txtPath: txtPath,
-          },
-        };
-        batch.push(vector);
-  
-        if (batch.length === batchSize || idx === chunks.length - 1) {
-          await index.upsert(batch);
-          batch = [];
-        }
-      }
-  
-      console.log(`Pinecone index updated with ${chunks.length} vectors`);
-      return true;
-    };
-  
-    return await textract
-      .send(startCommand)
-      .then(async (data: any) => {
-        console.log("Job Id:", data.JobId);
-        return await checkJobStatus(data.JobId);
-      })
-      .catch((error: any) => {
+
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // Check job status every 5 seconds
+      } catch (error) {
         console.error(error);
-      });
-    // */
-};
+        break;
+      }
+    }
+    // @ts-ignore
+    const theResult = words.join(" ");
+    console.log("the result ", theResult);
+
+    const index = client.Index(indexName);
+    const txtPath = "image file";
+    const text = theResult;
+
+    const textSplitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 1000,
+    });
+
+    const chunks = await textSplitter.createDocuments([text]);
+    const embeddingsArrays = await new OpenAIEmbeddings().embedDocuments(
+      chunks.map((chunk) => chunk.pageContent.replace(/\n/g, " "))
+    );
+
+    const batchSize = 100;
+    let batch = [];
+    for (let idx = 0; idx < chunks.length; idx++) {
+      const chunk = chunks[idx];
+      const vector = {
+        id: `${txtPath}_${idx}`,
+        values: embeddingsArrays[idx],
+        metadata: {
+          ...chunk.metadata,
+          loc: JSON.stringify(chunk.metadata.loc),
+          pageContent: chunk.pageContent,
+          user_id,
+          document_id,
+          txtPath: txtPath,
+        },
+      };
+      batch.push(vector);
+
+      if (batch.length === batchSize || idx === chunks.length - 1) {
+        await index.upsert(batch);
+        batch = [];
+      }
+    }
+
+    console.log(`Pinecone index updated with ${chunks.length} vectors`);
+    return true;
+  };
+
+  return await textract
+    .send(startCommand)
+    .then(async (data: any) => {
+      console.log("Job Id:", data.JobId);
+      return await checkJobStatus(data.JobId);
+    })
+    .catch((error: any) => {
+      console.error(error);
+    });
+  // */

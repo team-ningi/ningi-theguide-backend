@@ -187,6 +187,8 @@ router.post("/v1/aiadviser/add-document", (0, nocache_1.default)(), (0, helper_1
             original_filename: req.body.original_filename,
             saved_filename: req.body.saved_filename,
             custom_filename: req.body.custom_filename,
+            additional_context: req.body.additional_context,
+            type_of_embedding: req.body.type_of_embedding,
             metadata: req.body.metadata || {},
         };
         const document = await (0, document_creator_1.default)(newContent);

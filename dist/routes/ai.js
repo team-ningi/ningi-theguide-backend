@@ -76,7 +76,7 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
 router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
         await schemas_1.createEmbeddingsSchema.validateAsync(req.body);
-        const { user_id, document_url, document_id, file_type } = req.body;
+        const { user_id, document_url, document_id, file_type, additional_context, type_of_embedding, } = req.body;
         const data = await document_model_1.documentModel
             .find({
             _id: document_id,
@@ -102,17 +102,12 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
                 .lean()
                 .exec();
             let result;
-            if (["docx", "txt", "pdf"].includes(file_type)) {
+            if (type_of_embedding === "document") {
                 result = await (0, createEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename);
             }
-            else if (["png", "jpg", "jpeg"].includes(file_type)) {
-                console.log("create textract embedding for PNG");
-                result = await (0, createImageEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename);
-                console.log("result ? ...", result);
-                // return res.json({
-                //   error: true,
-                //   msg: "we need textract",
-                // });
+            else if (type_of_embedding === "image") {
+                result = await (0, createImageEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename, additional_context);
+                console.log("textract = ", result);
             }
             if (!result) {
                 return res.json({
