@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.questionSchema = exports.generateDocxSchema = exports.resetEmbedFlagSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
+exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.getTagsSchema = exports.questionSchema = exports.generateDocxSchema = exports.resetEmbedFlagSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
 exports.uuidSchema = joi_1.default.object({
     uuid: joi_1.default.string().required(),
@@ -107,6 +107,11 @@ exports.generateDocxSchema = joi_1.default.object({
 exports.questionSchema = joi_1.default.object({
     question: joi_1.default.string().required(),
     documentIds: joi_1.default.array().optional(),
+});
+exports.getTagsSchema = joi_1.default.object({
+    additionalPrompt: joi_1.default.string().required().allow(""),
+    tags: joi_1.default.array().required(),
+    documentIds: joi_1.default.array().required(),
 });
 exports.idSchema = joi_1.default.object({
     id: joi_1.default.string().required(),

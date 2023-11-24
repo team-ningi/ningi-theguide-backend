@@ -17,6 +17,7 @@ const reportsSchema = new mongoose.Schema(
     document_ids: { type: Array },
     report_hidden: { type: Boolean, default: false },
     generated_report: { type: Boolean, default: false },
+    status: { type: String, default: "processing" },
     metadata: { type: mongoose.SchemaTypes.Mixed },
     created_at: { type: Date },
     updated_at: { type: Date },

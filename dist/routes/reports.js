@@ -188,17 +188,16 @@ router.put("/v1/aiadviser/update-report", (0, nocache_1.default)(), (0, helper_1
             new: true,
             upsert: false,
         });
-        // const auditData = {
-        //   user_id: user[0]?._id,
-        //   action: "update_report",
-        //   metadata: {
-        //     user_id: user_id || report[0]?.user_id,
-        //     generated_report_url:
-        //       generated_report_url || report[0]?.generated_report_url,
-        //     generated_report: generated_report || report[0]?.generated_report,
-        //   },
-        // };
-        // await addToAudit(req, auditData);
+        const auditData = {
+            user_id: user[0]?._id,
+            action: "update_report",
+            metadata: {
+                user_id: user_id || report[0]?.user_id,
+                generated_report_url: generated_report_url || report[0]?.generated_report_url,
+                generated_report: generated_report || report[0]?.generated_report,
+            },
+        };
+        await addToAudit(req, auditData);
         res.json(result);
     }
     catch (e) {

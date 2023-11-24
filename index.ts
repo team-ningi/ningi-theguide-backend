@@ -45,5 +45,6 @@ app.listen(port, () => {
 });
 
 process.on("SIGINT", () => {
+  console.log("teardown, disconnecting");
   require("./setup").teardown(); // eslint-disable-line global-require
 });

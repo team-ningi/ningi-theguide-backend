@@ -118,6 +118,13 @@ export const questionSchema = Joi.object({
   documentIds: Joi.array().optional(),
 });
 
+export const getTagsSchema = Joi.object({
+  additionalPrompt: Joi.string().required().allow(""),
+  tags: Joi.array().required(),
+  reportId: Joi.string().required(),
+  documentIds: Joi.array().required(),
+});
+
 export const idSchema = Joi.object({
   id: Joi.string().required(),
 });

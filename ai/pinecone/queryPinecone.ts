@@ -10,6 +10,8 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
   question: string,
   filterQuery: object
 ) => {
+  await new Promise((resolve) => setTimeout(resolve, 600));
+
   const index = client.Index(indexName);
   const queryEmbedding = await new OpenAIEmbeddings().embedQuery(question);
 
@@ -37,7 +39,13 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
     });
 
     console.log(`\n\n Answer: ${result.text}`);
-    return `${result.text}`;
+    try {
+      return JSON.parse(result.text);
+    } catch (error) {
+      console.error("Error JSON parsing, ", error);
+      // return result.text;
+      return {};
+    }
   } else {
     return "No results found.";
   }

@@ -83,15 +83,15 @@ router.put("/v1/aiadviser/update-user", (0, nocache_1.default)(), (0, helper_1.A
             new: true,
             upsert: false,
         });
-        // const auditData = {
-        //   user_id: user[0]?._id,
-        //   action: "update_user",
-        //   metadata: {
-        //     uuid,
-        //     metadata: metadata || user[0]?.metadata,
-        //   },
-        // };
-        // await addToAudit(req, auditData);
+        const auditData = {
+            user_id: user[0]?._id,
+            action: "update_user",
+            metadata: {
+                uuid,
+                metadata: metadata || user[0]?.metadata,
+            },
+        };
+        await (0, helper_1.addToAudit)(req, auditData);
         res.json(result);
     }
     catch (e) {

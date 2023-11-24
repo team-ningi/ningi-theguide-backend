@@ -10,6 +10,7 @@ import {
   addTagsSchema,
   updateTagsSchema,
 } from "./schemas";
+import { ObjectId } from "mongodb";
 
 const router = Router();
 
@@ -140,7 +141,7 @@ router.put(
       await updateTagsSchema.validateAsync(req.body);
 
       const { id, label, tags, metadata = {} } = req.body;
-
+      console.log("id", id);
       const result = await tagsModel.findOneAndUpdate(
         { _id: id },
         {

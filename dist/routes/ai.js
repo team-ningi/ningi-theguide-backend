@@ -51,18 +51,54 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
             };
         }
         const result = await (0, queryPinecone_1.queryPineconeVectorStoreAndQueryLLM)(client, process.env.PINECONE_INDEX_NAME, question, filterQuery);
-        // const auditData = {
-        //   action: "query documents",
-        //   metadata: {
-        //     question,
-        //     answer: `${result}`,
-        //     documentIds,
-        //   },
-        // };
-        // await addToAudit(req, auditData);
+        const auditData = {
+            action: "query documents",
+            metadata: {
+                question,
+                answer: `${result}`,
+                documentIds,
+            },
+        };
+        await (0, helper_1.addToAudit)(req, auditData);
         return res.json({
             question,
             answer: `${result}`,
+        });
+    }
+    catch (e) {
+        console.log(e);
+        return res.json({
+            error: true,
+            msg: "failed to query data",
+        });
+    }
+});
+router.post("/v1/aiadviser/query-get-tags", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.getTagsSchema.validateAsync(req.body);
+        const { tags, documentIds, additionalPrompt } = req.body;
+        const client = new pinecone_1.Pinecone({
+            apiKey: process.env.PINECONE_API_KEY,
+            environment: process.env.PINECONE_ENVIRONMENT,
+        });
+        let filterQuery = {};
+        if (documentIds?.length) {
+            filterQuery = {
+                document_id: {
+                    $in: [...documentIds],
+                },
+            };
+        }
+        let tagResults = {};
+        console.log("api key ", process.env.OPENAI_API_KEY);
+        await Promise.all(tags?.map(async (item, i) => {
+            const answer = await (0, queryPinecone_1.queryPineconeVectorStoreAndQueryLLM)(client, process.env.PINECONE_INDEX_NAME, `${additionalPrompt} ${item.prompt?.replace("{{data}}", item?.data)}`, filterQuery);
+            // const answer = `batty ${i}`;
+            tagResults[item.tag] = answer;
+        }));
+        //
+        return res.json({
+            tagResults,
         });
     }
     catch (e) {

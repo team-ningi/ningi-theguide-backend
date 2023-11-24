@@ -92,15 +92,35 @@ export default async (
         {
           generated_report_url: `${outputName}`,
           generated_report: true,
+          status: "ready",
         },
         {
           new: true,
           upsert: false,
         }
       );
+      console.log("doc generation complete 🚀");
       return;
     } catch {
       console.log("failed to save file to CDN");
     }
   }
+};
+
+const test = {
+  Adviser: "Thomas Ham",
+  DateFirstInterview: "18/07/2023",
+  TypeOfInterview: "Face to Face",
+  AnyoneElsePresentinInterview: "No",
+  DoTheyHaveProtection: "No",
+  DoTheyHaveAMortgage: "No",
+  RetirementPlanning: "Yes",
+  SavingsAndInvestments: "Yes",
+  EstatePlanning: "No",
+  Client1PhoneNumber: "07950122388",
+  Client1PhoneNumberPreferred: "Yes",
+  Client1Email: "tonycervi72@gmail.com",
+  Client1EmailPreferred: "Yes",
+  Client2PhoneNumber: "07968017173",
+  Client2PhoneNumberPreferred: "Yes",
 };
