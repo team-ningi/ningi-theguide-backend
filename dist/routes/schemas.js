@@ -111,6 +111,7 @@ exports.questionSchema = joi_1.default.object({
 exports.getTagsSchema = joi_1.default.object({
     additionalPrompt: joi_1.default.string().required().allow(""),
     tags: joi_1.default.array().required(),
+    reportId: joi_1.default.string().required(),
     documentIds: joi_1.default.array().required(),
 });
 exports.idSchema = joi_1.default.object({

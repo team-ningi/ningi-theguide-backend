@@ -106,6 +106,7 @@ router.put("/v1/aiadviser/update-tags", (0, nocache_1.default)(), (0, helper_1.A
     try {
         await schemas_1.updateTagsSchema.validateAsync(req.body);
         const { id, label, tags, metadata = {} } = req.body;
+        console.log("id", id);
         const result = await tags_model_1.tagsModel.findOneAndUpdate({ _id: id }, {
             label,
             tags,
