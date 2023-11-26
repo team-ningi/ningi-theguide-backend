@@ -8,7 +8,8 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
   client: Pinecone,
   indexName: string,
   question: string,
-  filterQuery: object
+  filterQuery: object,
+  type: string
 ) => {
   await new Promise((resolve) => setTimeout(resolve, 600));
 
@@ -39,11 +40,15 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
     });
 
     console.log(`\n\n Answer: ${result.text}`);
+
+    if (type === "chat") {
+      return result.text;
+    }
+
     try {
       return JSON.parse(result.text);
     } catch (error) {
-      console.error("Error JSON parsing, ", error);
-      // return result.text;
+      console.error("Error JSON parsing, ", error); // dont return , will break the tagResult object
       return {};
     }
   } else {

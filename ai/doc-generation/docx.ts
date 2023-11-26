@@ -16,8 +16,6 @@ const s3Client = new S3Client({
   region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
 
-/* docs : basic.dox  | suitabilityReportTemplate.docx */
-
 export default async (
   tags: any,
   reportId: string,
@@ -36,7 +34,7 @@ export default async (
   }
 
   if (!useLocalFile) {
-    const document_url = await getPresignedUrl(`${templateURL}`); //document_url
+    const document_url = await getPresignedUrl(`${templateURL}`);
 
     const streamName = `/tmp/${Date.now()}.docx`;
 
@@ -105,22 +103,4 @@ export default async (
       console.log("failed to save file to CDN");
     }
   }
-};
-
-const test = {
-  Adviser: "Thomas Ham",
-  DateFirstInterview: "18/07/2023",
-  TypeOfInterview: "Face to Face",
-  AnyoneElsePresentinInterview: "No",
-  DoTheyHaveProtection: "No",
-  DoTheyHaveAMortgage: "No",
-  RetirementPlanning: "Yes",
-  SavingsAndInvestments: "Yes",
-  EstatePlanning: "No",
-  Client1PhoneNumber: "07950122388",
-  Client1PhoneNumberPreferred: "Yes",
-  Client1Email: "tonycervi72@gmail.com",
-  Client1EmailPreferred: "Yes",
-  Client2PhoneNumber: "07968017173",
-  Client2PhoneNumberPreferred: "Yes",
 };
