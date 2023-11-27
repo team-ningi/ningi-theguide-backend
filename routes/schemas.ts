@@ -80,11 +80,14 @@ export const updateTagsSchema = Joi.object({
 });
 
 export const addReportSchema = Joi.object({
+  initial_prompt: Joi.string().required(),
   user_id: Joi.string().required(),
   report_name: Joi.string().required(),
   report_type: Joi.string().required(),
   file_type: Joi.string().required(),
   tags: Joi.array().required(),
+  tag_chunks_to_process: Joi.array().required(),
+  tag_chunks_processed: Joi.array().required(),
   tagResults: Joi.object().required(),
   base_template_url: Joi.string().required().allow(""),
   generated_report_url: Joi.string().required().allow(""),
@@ -99,6 +102,13 @@ export const updateReportSchema = Joi.object({
   report_id: Joi.string().required(),
   generated_report_url: Joi.string().required(),
   generated_report: Joi.boolean().required(),
+});
+
+export const updateReportTagsProcessedSchema = Joi.object({
+  user_id: Joi.string().required(),
+  report_id: Joi.string().required(),
+  tag_chunks_to_process: Joi.array().required(),
+  tag_chunks_processed: Joi.array().required(),
 });
 
 export const resetEmbedFlagSchema = Joi.object({

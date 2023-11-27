@@ -214,6 +214,87 @@ router.post(
 );
 
 router.post(
+  "/v1/aiadviser/query-get-tags-single-chunk",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await getTagsSchema.validateAsync(req.body);
+      const { tags, documentIds, additionalPrompt, reportId } = req.body;
+
+      const report = await reportsModel
+        .findOne({
+          _id: reportId,
+        })
+        .lean()
+        .exec();
+
+      const tagResults = report?.tagResults || {};
+      const initialPrompt = report?.initial_prompt || {};
+
+      const client = new Pinecone({
+        apiKey: process.env.PINECONE_API_KEY,
+        environment: process.env.PINECONE_ENVIRONMENT,
+      });
+
+      let filterQuery = {};
+      if (documentIds?.length) {
+        filterQuery = {
+          document_id: {
+            $in: [...documentIds],
+          },
+        };
+      }
+
+      const prePrompt =
+        "I want to find out some information, everything i wish to know is inside of this Array of objects,the value in each item is a query.";
+      const postPrompt =
+        "return the data as an object of key: values, if you dont know an answer for a specific item keep the structure of key:value but make the value be an empty string, if you do know the answer replace the value with the correct data, Keep context, dont return anything you are unsure of. return only the specified JSON object of key: value. Respond ONLY with a Valid JSON message";
+
+      const processChunk = async (batch) => {
+        const batchStrings = batch.map((obj) => JSON.stringify(obj));
+        const theQuery = `${initialPrompt} ${prePrompt} [${batchStrings}] ${postPrompt}`;
+        // console.log(theQuery);
+
+        const answers = await queryPineconeVectorStoreAndQueryLLM(
+          client,
+          process.env.PINECONE_INDEX_NAME,
+          theQuery,
+          filterQuery,
+          "tags"
+        );
+        return answers;
+      };
+
+      const answers = await processChunk(tags);
+      const tagResultsUpdated = { ...tagResults, ...answers };
+      console.log("Finished Poulating Tags");
+
+      await reportsModel.findOneAndUpdate(
+        { _id: reportId },
+        {
+          tagResults: tagResultsUpdated,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+
+      return res.json({
+        message: "finished resolving tags",
+      });
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to resolve tags",
+      });
+    }
+  }
+);
+
+router.post(
   "/v1/aiadviser/create-embeddings",
   nocache(),
   AuthenticateManageToken(),
@@ -351,7 +432,6 @@ router.post(
     try {
       await generateDocxSchema.validateAsync(req.body);
       const { tags, reportId, templateURL, outputName } = req.body;
-
       await GenerateDocx(tags, reportId, templateURL, outputName);
 
       return res.json({

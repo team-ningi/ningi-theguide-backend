@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.getTagsSchema = exports.questionSchema = exports.generateDocxSchema = exports.resetEmbedFlagSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
+exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.getTagsSchema = exports.questionSchema = exports.generateDocxSchema = exports.resetEmbedFlagSchema = exports.updateReportTagsProcessedSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
 exports.uuidSchema = joi_1.default.object({
     uuid: joi_1.default.string().required(),
@@ -75,11 +75,14 @@ exports.updateTagsSchema = joi_1.default.object({
     metadata: joi_1.default.object().optional(),
 });
 exports.addReportSchema = joi_1.default.object({
+    initial_prompt: joi_1.default.string().required(),
     user_id: joi_1.default.string().required(),
     report_name: joi_1.default.string().required(),
     report_type: joi_1.default.string().required(),
     file_type: joi_1.default.string().required(),
     tags: joi_1.default.array().required(),
+    tag_chunks_to_process: joi_1.default.array().required(),
+    tag_chunks_processed: joi_1.default.array().required(),
     tagResults: joi_1.default.object().required(),
     base_template_url: joi_1.default.string().required().allow(""),
     generated_report_url: joi_1.default.string().required().allow(""),
@@ -93,6 +96,12 @@ exports.updateReportSchema = joi_1.default.object({
     report_id: joi_1.default.string().required(),
     generated_report_url: joi_1.default.string().required(),
     generated_report: joi_1.default.boolean().required(),
+});
+exports.updateReportTagsProcessedSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    report_id: joi_1.default.string().required(),
+    tag_chunks_to_process: joi_1.default.array().required(),
+    tag_chunks_processed: joi_1.default.array().required(),
 });
 exports.resetEmbedFlagSchema = joi_1.default.object({
     embed_flag: joi_1.default.boolean().required(),

@@ -137,10 +137,13 @@ router.post("/v1/aiadviser/add-report", (0, nocache_1.default)(), (0, helper_1.A
         await schemas_1.addReportSchema.validateAsync(req.body);
         const newReport = {
             user_id: req.body.user_id,
+            initial_prompt: req.body.initial_prompt,
             report_name: req.body.report_name,
             report_type: req.body.report_type,
             file_type: req.body.file_type,
             tags: req.body.tags,
+            tag_chunks_to_process: req.body.tag_chunks_to_process,
+            tag_chunks_processed: req.body.tag_chunks_processed,
             tagResults: req.body.tagResults,
             base_template_url: req.body.base_template_url,
             generated_report_url: req.body.generated_report_url,
@@ -164,9 +167,53 @@ router.post("/v1/aiadviser/add-report", (0, nocache_1.default)(), (0, helper_1.A
         });
     }
 });
+router.put("/v1/aiadviser/update-report-tags-processed", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.updateReportTagsProcessedSchema.validateAsync(req.body);
+        const { user_id, report_id, tag_chunks_to_process, tag_chunks_processed, } = req.body;
+        const report = await reports_model_1.reportsModel
+            .find({
+            _id: report_id,
+        })
+            .lean()
+            .exec();
+        if (!report) {
+            return res.json({
+                error: true,
+                msg: "No report found",
+            });
+        }
+        console.log({ report });
+        const result = await reports_model_1.reportsModel.findOneAndUpdate({ _id: report_id }, {
+            tag_chunks_to_process: tag_chunks_to_process || report[0]?.tag_chunks_to_process,
+            tag_chunks_processed: tag_chunks_processed || report[0]?.tag_chunks_processed,
+        }, {
+            new: true,
+            upsert: false,
+        });
+        const auditData = {
+            user_id,
+            action: "update_report_tags_processed",
+            metadata: {
+                user_id: user_id || report[0]?.user_id,
+                tag_chunks_to_process: tag_chunks_to_process || report[0]?.tag_chunks_to_process,
+                tag_chunks_processed: tag_chunks_processed || report[0]?.tag_chunks_processed,
+            },
+        };
+        await (0, helper_1.addToAudit)(req, auditData);
+        res.json(result);
+    }
+    catch (e) {
+        console.log(e);
+        return res.json({
+            error: true,
+            msg: "failed to update report tag processed status",
+        });
+    }
+});
 router.put("/v1/aiadviser/update-report", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
-        await updateReportSchema.validateAsync(req.body);
+        await schemas_1.updateReportSchema.validateAsync(req.body);
         const { user_id, report_id, generated_report_url, generated_report } = req.body;
         const report = await reports_model_1.reportsModel
             .find({
@@ -197,14 +244,14 @@ router.put("/v1/aiadviser/update-report", (0, nocache_1.default)(), (0, helper_1
                 generated_report: generated_report || report[0]?.generated_report,
             },
         };
-        await addToAudit(req, auditData);
+        await (0, helper_1.addToAudit)(req, auditData);
         res.json(result);
     }
     catch (e) {
         console.log(e);
         return res.json({
             error: true,
-            msg: "failed to update user",
+            msg: "failed to update report",
         });
     }
 });
