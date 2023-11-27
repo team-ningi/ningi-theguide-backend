@@ -5,7 +5,7 @@ const openai_1 = require("langchain/embeddings/openai");
 const openai_2 = require("langchain/llms/openai");
 const chains_1 = require("langchain/chains");
 const document_1 = require("langchain/document");
-const queryPineconeVectorStoreAndQueryLLM = async (client, indexName, question, filterQuery) => {
+const queryPineconeVectorStoreAndQueryLLM = async (client, indexName, question, filterQuery, type) => {
     await new Promise((resolve) => setTimeout(resolve, 600));
     const index = client.Index(indexName);
     const queryEmbedding = await new openai_1.OpenAIEmbeddings().embedQuery(question);
@@ -28,12 +28,14 @@ const queryPineconeVectorStoreAndQueryLLM = async (client, indexName, question, 
             question: question,
         });
         console.log(`\n\n Answer: ${result.text}`);
+        if (type === "chat") {
+            return result.text;
+        }
         try {
             return JSON.parse(result.text);
         }
         catch (error) {
-            console.error("Error JSON parsing, ", error);
-            // return result.text;
+            console.error("Error JSON parsing, ", error); // dont return , will break the tagResult object
             return {};
         }
     }

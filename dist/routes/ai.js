@@ -52,7 +52,7 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
                 },
             };
         }
-        const result = await (0, queryPinecone_1.queryPineconeVectorStoreAndQueryLLM)(client, process.env.PINECONE_INDEX_NAME, question, filterQuery);
+        const result = await (0, queryPinecone_1.queryPineconeVectorStoreAndQueryLLM)(client, process.env.PINECONE_INDEX_NAME, question, filterQuery, "chat");
         const auditData = {
             action: "query documents",
             metadata: {
@@ -105,10 +105,9 @@ router.post("/v1/aiadviser/query-get-tags", (0, nocache_1.default)(), (0, helper
             const batchStrings = batch.map((obj) => JSON.stringify(obj));
             const theQuery = `${additionalPrompt} ${prePrompt} ${batchStrings} ${postPrompt}`;
             // console.log(theQuery);
-            const answers = await (0, queryPinecone_1.queryPineconeVectorStoreAndQueryLLM)(client, process.env.PINECONE_INDEX_NAME, theQuery, filterQuery);
+            const answers = await (0, queryPinecone_1.queryPineconeVectorStoreAndQueryLLM)(client, process.env.PINECONE_INDEX_NAME, theQuery, filterQuery, "tags");
             return answers;
         };
-        //  $4.82 -> AFTER FF ->  ??   (15 in a chunk) -> COSTS ALL TAGS RETURNED
         const processAllChunks = async (batches) => {
             for (const batch of batches) {
                 const answers = await processChunk(batch);
@@ -120,17 +119,16 @@ router.post("/v1/aiadviser/query-get-tags", (0, nocache_1.default)(), (0, helper
         const chunks = chunkArrayInGroups(tags, 15);
         console.log(chunks.length);
         await processAllChunks(chunks);
-        console.log("finsihed poulating tags");
-        console.log({ tagResults });
-        console.log("amount of tags generated: " + Object.keys(tagResults).length);
-        // Update report - insert tag results
+        if (Object.keys(tagResults).length < tags.length) {
+            console.log(` Did not generate all tags, tags expected: ${tags.length} , tags generated : ${Object.keys(tagResults).length} `);
+        }
+        console.log("Finished Poulating Tags");
         const result = await reports_model_1.reportsModel.findOneAndUpdate({ _id: reportId }, {
             tagResults,
         }, {
             new: true,
             upsert: false,
         });
-        // generate document
         const outputName = `${(0, uuid_1.v4)()}.${result?.file_type}`;
         await (0, docx_1.default)(tagResults, reportId, result.base_template_url, outputName);
         return res.json({
@@ -227,7 +225,6 @@ router.post("/v1/aiadviser/create-index", (0, nocache_1.default)(), (0, helper_1
         });
     }
 });
-//doc gen
 router.post("/v1/aiadviser/docx-generation", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
         await schemas_1.generateDocxSchema.validateAsync(req.body);
@@ -246,111 +243,3 @@ router.post("/v1/aiadviser/docx-generation", (0, nocache_1.default)(), (0, helpe
     }
 });
 exports.default = router;
-/*
-
-{
-    Client1Title: 'Mr',
-    Client1OtherTitles: '',
-    Client1FirstName: 'Antonio',
-    Client1MiddleName: 'Gerardo',
-    Client1LastName: 'Cervi',
-    Client1Salutation: 'Tony',
-    Client1MaidenPreviousName: 'Black',
-    Client1DOB: '20/01/1972',
-    Client1Age: '51',
-    Client1Gender: 'Male',
-    Client1MaritalStatus: 'Married',
-    Client1MarriedSince: '',
-    Client1Nationality: 'British',
-    Client1NationalInsuranceNum: 'NX720230D',
-    Client1CountryOfResidence: 'United Kingdom',
-    Client2Title: 'Mrs',
-    Client2OtherTitles: '',
-    Client2FirstName: 'Aileen',
-    Client2MiddleName: '',
-    Client2LastName: 'Cervi',
-    Client2Salutation: 'Mrs',
-    Client2MaidenPreviousName: 'Black',
-    Client2DOB: '12/09/1975',
-    Client2Age: '47',
-    Client2Gender: 'Female',
-    Client2MaritalStatus: 'Married',
-    Client2MarriedSince: '',
-    Client2Nationality: 'British',
-    Client2NationalInsuranceNum: 'JC705680A',
-    Client2CountryOfResidence: 'United Kingdom',
-    Client2CountryOfDomicile: 'United Kingdom',
-    Client2Expatriate: 'No',
-    Client2CountryOfBirth: 'United Kingdom',
-    Client2PlaceOfBirth: 'Broxburn',
-    Client2HaveValidWill: 'Yes',
-    Client2IsWillUpToDate: 'Yes',
-    Client2BeenAdvisedToMakeAWill: 'No',
-    Client2PowerOfAttorneyGranted: 'No',
-    Client2AttorneyName: '',
-    Client2ASmoker: 'No',
-    Client2SmokedInLast12Months: 'No',
-    Client2InGoodHealth: 'Yes',
-    Client2Notes: '',
-    Client2MedicalConditions: 'No',
-    Client2AnyConsiderationsToBeTaken: 'No',
-    Client1AddressLine1: '11 Castell Maynes Crescent',
-    Client1AddressLine2: '',
-    Client1AddressLine3: '',
-    Client1AddressLine4: '',
-    Client1City: 'Bonnyrigg',
-    Client1Country: 'United Kingdom',
-    Client1Postcode: 'EH19 3RU',
-    Client1AddressType: 'Home',
-    Client1ResidencyStatus: '',
-    Client1DateStartedAtAddress: '',
-    Client1DateEndedAtAddress: '',
-    Client1DefaultAddress: 'Current Address',
-    Client1AddressStatus: 'Current Address',
-    Client1RegisteredOnElecoralRoll: 'Yes',
-    Client1TimeAtAddressInMonths: '',
-    Client2AddressLine1: '11 Castell Maynes Crescent',
-    Client2AddressLine2: '',
-    Client2AddressLine3: '',
-    Client2AddressLine4: '',
-    Client2City: 'Bonnyrigg',
-    Client2Country: 'United Kingdom',
-    Client2Postcode: 'EH19 3RU',
-    Client2AddressType: 'Home',
-    Client2ResidencyStatus: '',
-    Client2DateStartedAtAddress: '',
-    Client2DateEndedAtAddress: '',
-    Client2DefaultAddress: 'Current Address',
-    Client2AddressStatus: 'Current Address',
-    Client2RegisteredOnElecoralRoll: 'Yes',
-    Client2TimeAtAddressInMonths: '',
-    Client2Email: 'aileencervi@gmail.com',
-    Client2EmailPreferred: 'Yes',
-    Client1BankName: '',
-    Client1AccountHolder: '',
-    Client1BankAddressLine1: '',
-    Client1BankAddressLine2: '',
-    Client1BankAddressLine3: '',
-    Client1BankAddressLine4: '',
-    Client1BankAddressCity: '',
-    Client1BankAddressCountyStateProvince: '',
-    Client1BankAddressCountry: '',
-    Client1BankAddressPostCode: '',
-    Client1BankAccountNumber: '',
-    Client1BankAccountSortCode: '',
-    Client1BankDefault: '',
-    Client2BankName: '',
-    Client2AccountHolder: 'Aileen Cervi',
-    Client2BankAddressLine1: '11 Castell Maynes Crescent',
-    Client2BankAddressLine2: '',
-    Client2BankAddressLine3: '',
-    Client2BankAddressLine4: '',
-    Client2BankAddressCity: 'Bonnyrigg',
-    Client2BankAddressCountyStateProvince: '',
-    Client2BankAddressCountry: 'United Kingdom',
-    Client2BankAddressPostCode: 'EH19 3RU',
-    Client2BankAccountNumber: '',
-    Client2BankAccountSortCode: '',
-    Client2BankDefault: ''
-  }
-  */

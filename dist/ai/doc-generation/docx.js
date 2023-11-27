@@ -15,7 +15,6 @@ const s3Client = new S3Client({
     },
     region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
-/* docs : basic.dox  | suitabilityReportTemplate.docx */
 exports.default = async (tags, reportId, templateURL, outputName) => {
     let content;
     const useLocalFile = false;
@@ -24,7 +23,7 @@ exports.default = async (tags, reportId, templateURL, outputName) => {
         content = fs.readFileSync(path.resolve(__dirname, "suitabilityReportTemplate.docx"), "binary");
     }
     if (!useLocalFile) {
-        const document_url = await (0, helper_1.getPresignedUrl)(`${templateURL}`); //document_url
+        const document_url = await (0, helper_1.getPresignedUrl)(`${templateURL}`);
         const streamName = `/tmp/${Date.now()}.docx`;
         const file = fs.createWriteStream(streamName);
         content = await new Promise((resolve, reject) => {
@@ -81,21 +80,4 @@ exports.default = async (tags, reportId, templateURL, outputName) => {
             console.log("failed to save file to CDN");
         }
     }
-};
-const test = {
-    Adviser: "Thomas Ham",
-    DateFirstInterview: "18/07/2023",
-    TypeOfInterview: "Face to Face",
-    AnyoneElsePresentinInterview: "No",
-    DoTheyHaveProtection: "No",
-    DoTheyHaveAMortgage: "No",
-    RetirementPlanning: "Yes",
-    SavingsAndInvestments: "Yes",
-    EstatePlanning: "No",
-    Client1PhoneNumber: "07950122388",
-    Client1PhoneNumberPreferred: "Yes",
-    Client1Email: "tonycervi72@gmail.com",
-    Client1EmailPreferred: "Yes",
-    Client2PhoneNumber: "07968017173",
-    Client2PhoneNumberPreferred: "Yes",
 };
