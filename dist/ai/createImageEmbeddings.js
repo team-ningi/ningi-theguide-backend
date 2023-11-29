@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 const openai_1 = require("langchain/embeddings/openai");
+const openai_2 = require("langchain/llms/openai");
+const document_1 = require("langchain/document");
+const chains_1 = require("langchain/chains");
 const text_splitter_1 = require("langchain/text_splitter");
 const { TextractClient, StartDocumentTextDetectionCommand, GetDocumentTextDetectionCommand, StartDocumentAnalysisCommand, GetDocumentAnalysisCommand, } = require("@aws-sdk/client-textract");
 const fs = require("fs");
@@ -64,10 +67,29 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
         }
         // @ts-ignore
         const theResult = words.join(" ");
-        console.log("the result ", theResult);
+        console.log("the original result ", theResult);
+        //call openai
+        const llm = new openai_2.OpenAI({ modelName: "gpt-4" });
+        const chain = (0, chains_1.loadQAStuffChain)(llm);
+        const refinedResult = await chain.call({
+            input_documents: [
+                //@ts-ignore
+                new document_1.Document({ pageContent: theResult }),
+            ],
+            question: `Can you please rewrite the provided text as clearly as possible.`,
+        });
+        console.log("the refined result ", refinedResult);
+        // TODO 1
+        // RETURN refinedResult to the front end
+        // in the middle >
+        // show refined text in UI
+        // allow user to tweak it
+        // send it to the new api route and do TODO2
+        // TODO 2
+        // FROM HERE BE ITS OWN API CALL
         const index = client.Index(indexName);
         const txtPath = `textract: ${saved_filename}`;
-        const text = theResult;
+        const text = refinedResult?.text; //theResult;
         const textSplitter = new text_splitter_1.RecursiveCharacterTextSplitter({
             chunkSize: 1000,
         });

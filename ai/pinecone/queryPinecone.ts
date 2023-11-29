@@ -27,7 +27,7 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
   console.log(`Found ${queryResponse.matches.length} matches...`);
 
   if (queryResponse.matches.length) {
-    const llm = new OpenAI({});
+    const llm = new OpenAI({ modelName: "gpt-4" });
     const chain = loadQAStuffChain(llm);
 
     const concatenatedPageContent = queryResponse.matches
@@ -40,7 +40,6 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
     });
 
     console.log(`\n\n Answer: ${result.text}`);
-
     if (type === "chat") {
       return result.text;
     }
@@ -48,8 +47,19 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
     try {
       return JSON.parse(result.text);
     } catch (error) {
-      console.error("Error JSON parsing, ", error); // dont return , will break the tagResult object
-      return {};
+      try {
+        console.error("retrying to generate tags, ", error);
+        const result = await chain.call({
+          input_documents: [
+            new Document({ pageContent: concatenatedPageContent }),
+          ],
+          question: question,
+        });
+        return JSON.parse(result.text);
+      } catch (error) {
+        console.error("Error JSON parsing on retry, ", error); // dont return , will break the tagResult object
+        throw new Error("Failed to generate tags for report");
+      }
     }
   } else {
     return "No results found.";

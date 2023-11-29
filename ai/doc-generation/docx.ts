@@ -90,7 +90,7 @@ export default async (
         {
           generated_report_url: `${outputName}`,
           generated_report: true,
-          status: "ready",
+          status: "complete",
         },
         {
           new: true,

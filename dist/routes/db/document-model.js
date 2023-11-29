@@ -11,6 +11,7 @@ const documentSchema = new mongoose.Schema({
     saved_filename: { type: String, index: true },
     custom_filename: { type: String, index: true },
     type_of_embedding: { type: String, default: "document" },
+    image_to_text_content: { type: String, default: "" },
     additional_context: { type: String, default: "" },
     embedding_created: { type: Boolean, default: false },
     metadata: { type: mongoose.SchemaTypes.Mixed },

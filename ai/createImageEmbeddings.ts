@@ -1,5 +1,8 @@
 import "dotenv/config";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { OpenAI } from "langchain/llms/openai";
+import { Document } from "langchain/document";
+import { loadQAStuffChain } from "langchain/chains";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { Errback, Response } from "express";
@@ -87,11 +90,34 @@ export default async (
     }
     // @ts-ignore
     const theResult = words.join(" ");
-    console.log("the result ", theResult);
+    console.log("the original result ", theResult);
 
+    //call openai
+    const llm = new OpenAI({ modelName: "gpt-4" });
+    const chain = loadQAStuffChain(llm);
+
+    const refinedResult = await chain.call({
+      input_documents: [
+        //@ts-ignore
+        new Document({ pageContent: theResult }),
+      ],
+      question: `Can you please rewrite the provided text as clearly as possible.`,
+    });
+
+    console.log("the refined result ", refinedResult);
+    // TODO 1
+    // RETURN refinedResult to the front end
+
+    // in the middle >
+    // show refined text in UI
+    // allow user to tweak it
+    // send it to the new api route and do TODO2
+
+    // TODO 2
+    // FROM HERE BE ITS OWN API CALL
     const index = client.Index(indexName);
     const txtPath = `textract: ${saved_filename}`;
-    const text = theResult;
+    const text = refinedResult?.text; //theResult;
 
     const textSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,

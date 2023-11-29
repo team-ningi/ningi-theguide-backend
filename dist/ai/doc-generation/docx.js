@@ -68,7 +68,7 @@ exports.default = async (tags, reportId, templateURL, outputName) => {
             await reports_model_1.reportsModel.findOneAndUpdate({ _id: reportId }, {
                 generated_report_url: `${outputName}`,
                 generated_report: true,
-                status: "ready",
+                status: "complete",
             }, {
                 new: true,
                 upsert: false,

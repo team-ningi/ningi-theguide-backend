@@ -167,8 +167,8 @@ router.post("/v1/aiadviser/query-get-tags-single-chunk", (0, nocache_1.default)(
                 },
             };
         }
-        const prePrompt = "I want to find out some information, everything i wish to know is inside of this Array of objects,the value in each item is a query.";
-        const postPrompt = "return the data as an object of key: values, if you dont know an answer for a specific item keep the structure of key:value but make the value be an empty string, if you do know the answer replace the value with the correct data, Keep context, dont return anything you are unsure of. return only the specified JSON object of key: value. Respond ONLY with a Valid JSON message";
+        const prePrompt = "I want to find out some information, everything i wish to know is inside of this Array of objects,the value in each item is a query.Keep the answers to each query as simple as possible.";
+        const postPrompt = "return the data as a valid JSON object consisting of { 'key': 'value' }, if you dont know an answer for a specific item keep the structure of key:value but make the value be an empty string, if you do know the answer replace the value with the correct data, Keep context, dont return anything you are unsure of. return only the specified JSON object of key: value. Respond ONLY with a Valid JSON object";
         const processChunk = async (batch) => {
             const batchStrings = batch.map((obj) => JSON.stringify(obj));
             const theQuery = `${initialPrompt} ${prePrompt} [${batchStrings}] ${postPrompt}`;
@@ -190,7 +190,6 @@ router.post("/v1/aiadviser/query-get-tags-single-chunk", (0, nocache_1.default)(
         });
     }
     catch (e) {
-        console.log(e);
         return res.json({
             error: true,
             msg: "failed to resolve tags",
@@ -232,6 +231,9 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
             else if (type_of_embedding === "image") {
                 result = await (0, createImageEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename, additional_context);
                 console.log("textract = ", result);
+                // RES RETURN THE TEXT
+                // ON THE NEW API CALL DO THE documentModel.findOneAndUpdate(
+                // update embedding_created + image_to_text_content= result
             }
             if (!result) {
                 return res.json({

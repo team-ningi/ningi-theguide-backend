@@ -83,6 +83,7 @@ describe("API routes", () => {
     });
 
     expect(res.status).toBe(200);
+    console.log("res ", res);
     const theMsg = JSON.parse(res.text);
     expect(theMsg[0].saved_filename).toBe("123456789.docx");
   });
@@ -152,6 +153,7 @@ describe("API routes", () => {
     const res = await request(app).post("/v1/aiadviser/add-template").send({
       user_id: userID,
       label: "my test file2",
+      file_url: "",
       metadata: {},
     });
 
@@ -219,6 +221,7 @@ describe("API routes", () => {
         report_name: "test report",
         report_type: "standard",
         file_type: "docx",
+        initial_prompt: "test initial prompt",
         tags: [
           {
             tag: "first_name",
@@ -230,6 +233,8 @@ describe("API routes", () => {
         tagResults: {
           first_name: "Gary",
         },
+        tag_chunks_to_process: [],
+        tag_chunks_processed: [],
         base_template_url: "i_dont_exist.docx",
         generated_report_url: "i_dont_exist.docx",
         generated_report: true,

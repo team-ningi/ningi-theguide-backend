@@ -247,9 +247,9 @@ router.post(
       }
 
       const prePrompt =
-        "I want to find out some information, everything i wish to know is inside of this Array of objects,the value in each item is a query.";
+        "I want to find out some information, everything i wish to know is inside of this Array of objects,the value in each item is a query.Keep the answers to each query as simple as possible.";
       const postPrompt =
-        "return the data as an object of key: values, if you dont know an answer for a specific item keep the structure of key:value but make the value be an empty string, if you do know the answer replace the value with the correct data, Keep context, dont return anything you are unsure of. return only the specified JSON object of key: value. Respond ONLY with a Valid JSON message";
+        "return the data as a valid JSON object consisting of { 'key': 'value' }, if you dont know an answer for a specific item keep the structure of key:value but make the value be an empty string, if you do know the answer replace the value with the correct data, Keep context, dont return anything you are unsure of. return only the specified JSON object of key: value. Respond ONLY with a Valid JSON object";
 
       const processChunk = async (batch) => {
         const batchStrings = batch.map((obj) => JSON.stringify(obj));
@@ -285,7 +285,6 @@ router.post(
         message: "finished resolving tags",
       });
     } catch (e) {
-      console.log(e);
       return res.json({
         error: true,
         msg: "failed to resolve tags",
@@ -361,6 +360,11 @@ router.post(
           );
 
           console.log("textract = ", result);
+
+          // RES RETURN THE TEXT
+
+          // ON THE NEW API CALL DO THE documentModel.findOneAndUpdate(
+          // update embedding_created + image_to_text_content= result
         }
 
         if (!result) {
