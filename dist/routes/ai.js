@@ -14,11 +14,13 @@ const schemas_1 = require("./schemas");
 const textloader_1 = __importDefault(require("../ai/textloader"));
 const audioloader_1 = __importDefault(require("../ai/audioloader"));
 const createEmbeddings_1 = __importDefault(require("../ai/createEmbeddings"));
-const createImageEmbeddings_1 = __importDefault(require("../ai/createImageEmbeddings"));
 const createIndex_1 = __importDefault(require("../ai/pinecone/createIndex"));
 const queryPinecone_1 = require("../ai/pinecone/queryPinecone");
 const docx_1 = __importDefault(require("../ai/doc-generation/docx"));
 const uuid_1 = require("uuid");
+const extract_text_1 = __importDefault(require("../ai/image-to-text/extract-text"));
+const refine_text_1 = __importDefault(require("../ai/image-to-text/refine-text"));
+const embed_text_1 = __importDefault(require("../ai/image-to-text/embed-text"));
 const router = (0, express_1.Router)();
 router.get("/v1/aiadviser/in-memory-ai-text", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     const audio = !!req.query.audio || false;
@@ -227,19 +229,27 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
             let result;
             if (type_of_embedding === "document") {
                 result = await (0, createEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename);
+                if (!result) {
+                    return res.json({
+                        error: true,
+                        msg: "failed to EMBED file",
+                    });
+                }
             }
             else if (type_of_embedding === "image") {
-                result = await (0, createImageEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename, additional_context);
+                result = await (0, extract_text_1.default)(data[0]?.saved_filename, additional_context);
                 console.log("textract = ", result);
-                // RES RETURN THE TEXT
-                // ON THE NEW API CALL DO THE documentModel.findOneAndUpdate(
-                // update embedding_created + image_to_text_content= result
-            }
-            if (!result) {
-                return res.json({
-                    error: true,
-                    msg: "failed to EMBED file",
-                });
+                if (result) {
+                    return res.json({
+                        result,
+                    });
+                }
+                else {
+                    return res.json({
+                        error: true,
+                        msg: "failed to EMBED file",
+                    });
+                }
             }
             await document_model_1.documentModel.findOneAndUpdate({ _id: document_id }, {
                 embedding_created: true,
@@ -257,6 +267,65 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
         return res.json({
             error: true,
             msg: "failed to embed data",
+        });
+    }
+});
+router.post("/v1/aiadviser/refine-text", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.refineTextSchema.validateAsync(req.body);
+        const { original_text, document_id } = req.body;
+        const results = await (0, refine_text_1.default)(original_text);
+        const { originalText, refined } = results;
+        await document_model_1.documentModel.findOneAndUpdate({ _id: document_id }, {
+            image_to_text_content: refined,
+            image_to_text_content_original: originalText,
+        }, {
+            new: true,
+            upsert: false,
+        });
+        return res.json({
+            msg: "successfully refined and stored text",
+        });
+    }
+    catch (e) {
+        console.log(e);
+        return res.json({
+            error: true,
+            msg: "failed to refine the text",
+        });
+    }
+});
+router.post("/v1/aiadviser/embed-refined-text", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.embedRefinedTextSchema.validateAsync(req.body);
+        const { user_id, document_id, textToEmbed } = req.body;
+        const data = await document_model_1.documentModel
+            .find({
+            _id: document_id,
+        })
+            .lean()
+            .exec();
+        if (!data.length) {
+            return res.json({
+                error: true,
+                msg: "invalid Doc Id",
+            });
+        }
+        const saved_filename = data[0]?.saved_filename;
+        const client = new pinecone_1.Pinecone({
+            apiKey: process.env.PINECONE_API_KEY,
+            environment: process.env.PINECONE_ENVIRONMENT,
+        });
+        await (0, embed_text_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_id, saved_filename, textToEmbed);
+        return res.json({
+            msg: "Embedding complete",
+        });
+    }
+    catch (e) {
+        console.log(e);
+        return res.json({
+            error: true,
+            msg: "failed to refine the text",
         });
     }
 });

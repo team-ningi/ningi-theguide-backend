@@ -18,7 +18,9 @@ const textract = new TextractClient({
     },
     region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
-const page = "1";
+// THE ORIGINAL CALL FOR IMAGE->TEXT
+// TAKES TOO LONG ON AN ACTUAL SERVER
+// so split into 3 calls > extract | refine | embed
 exports.default = async (client, indexName, user_id, document_url, document_id, file_type, saved_filename, additionalContext) => {
     const params = {
         DocumentLocation: {
@@ -38,11 +40,11 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
         while (true) {
             try {
                 const data = await textract.send(getCommand);
-                console.log("Job Status:", data.JobStatus);
+                console.log("status:", data.JobStatus);
                 if (data.JobStatus === "SUCCEEDED") {
                     data.Blocks.forEach((block) => {
                         if (block.BlockType === "WORD") {
-                            console.log("word : ", block.Text);
+                            // console.log("word : ", block.Text);
                             words.push(block.Text);
                         }
                     });
@@ -58,7 +60,7 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
                     console.log("Text extraction failed");
                     break;
                 }
-                await new Promise((resolve) => setTimeout(resolve, 5000)); // Check job status every 5 seconds
+                await new Promise((resolve) => setTimeout(resolve, 1000)); // Check job status every x seconds
             }
             catch (error) {
                 console.error(error);
@@ -67,7 +69,7 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
         }
         // @ts-ignore
         const theResult = words.join(" ");
-        console.log("the original result ", theResult);
+        console.log("the original result ", theResult); // END OF TODO 1
         //call openai
         const llm = new openai_2.OpenAI({ modelName: "gpt-4" });
         const chain = (0, chains_1.loadQAStuffChain)(llm);
@@ -76,9 +78,9 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
                 //@ts-ignore
                 new document_1.Document({ pageContent: theResult }),
             ],
-            question: `Can you please rewrite the provided text as clearly as possible.`,
+            question: `Can you rewrite the provided text as clearly as possible. do not make any information up, only use the context provided.`,
         });
-        console.log("the refined result ", refinedResult);
+        console.log("the refined result ", refinedResult); // END OF TODO 2
         // TODO 1
         // RETURN refinedResult to the front end
         // in the middle >
@@ -130,110 +132,4 @@ exports.default = async (client, indexName, user_id, document_url, document_id, 
         console.error(error);
     });
 };
-//
-// Alternative way to use AWS textract >
-// if ever needed just replace entire body of the function above
-/* StartDocumentTextDetectionCommand
-
-  const params = {
-    DocumentLocation: {
-      S3Object: {
-        Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
-        Name: saved_filename,
-      },
-    },
-  };
-
-  const startCommand = new StartDocumentTextDetectionCommand(params);
-
-  const checkJobStatus = async (jobId: string) => {
-    const getCommand = new GetDocumentTextDetectionCommand({ JobId: jobId });
-    // @ts-ignore
-    let words = [`${additionalContext} .`];
-
-    while (true) {
-      try {
-        const data = await textract.send(getCommand);
-
-        console.log("Job Status:", data.JobStatus);
-
-        if (data.JobStatus === "SUCCEEDED") {
-          // Process the extracted text results here
-          data.Blocks.forEach((block: any) => {
-            if (block.BlockType === "WORD") {
-              words.push(block.Text);
-            }
-          });
-
-          if (data.NextToken) {
-            // If there is a NextToken, call GetDocumentTextDetectionCommand again with the NextToken
-            getCommand.NextToken = data.NextToken;
-          } else {
-            break; // Exit the loop when all pages have been processed
-          }
-        } else if (data.JobStatus === "FAILED") {
-          console.log("Text extraction failed");
-          break;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, 5000)); // Check job status every 5 seconds
-      } catch (error) {
-        console.error(error);
-        break;
-      }
-    }
-    // @ts-ignore
-    const theResult = words.join(" ");
-    console.log("the result ", theResult);
-
-    const index = client.Index(indexName);
-    const txtPath = "image file";
-    const text = theResult;
-
-    const textSplitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-    });
-
-    const chunks = await textSplitter.createDocuments([text]);
-    const embeddingsArrays = await new OpenAIEmbeddings().embedDocuments(
-      chunks.map((chunk) => chunk.pageContent.replace(/\n/g, " "))
-    );
-
-    const batchSize = 100;
-    let batch = [];
-    for (let idx = 0; idx < chunks.length; idx++) {
-      const chunk = chunks[idx];
-      const vector = {
-        id: `${txtPath}_${idx}`,
-        values: embeddingsArrays[idx],
-        metadata: {
-          ...chunk.metadata,
-          loc: JSON.stringify(chunk.metadata.loc),
-          pageContent: chunk.pageContent,
-          user_id,
-          document_id,
-          txtPath: txtPath,
-        },
-      };
-      batch.push(vector);
-
-      if (batch.length === batchSize || idx === chunks.length - 1) {
-        await index.upsert(batch);
-        batch = [];
-      }
-    }
-
-    console.log(`Pinecone index updated with ${chunks.length} vectors`);
-    return true;
-  };
-
-  return await textract
-    .send(startCommand)
-    .then(async (data: any) => {
-      console.log("Job Id:", data.JobId);
-      return await checkJobStatus(data.JobId);
-    })
-    .catch((error: any) => {
-      console.error(error);
-    });
-  // */
+// Alternative method to use AWS textract > StartDocumentTextDetectionCommand

@@ -227,7 +227,7 @@ router.put("/v1/aiadviser/update-report", (0, nocache_1.default)(), (0, helper_1
                 msg: "No report found",
             });
         }
-        console.log({ report });
+        // console.log({ report });
         const result = await reports_model_1.reportsModel.findOneAndUpdate({ _id: report_id }, {
             generated_report_url: generated_report_url || report[0]?.generated_report_url,
             generated_report: generated_report || report[0]?.generated_report,

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.getTagsSchema = exports.questionSchema = exports.generateDocxSchema = exports.resetEmbedFlagSchema = exports.updateReportTagsProcessedSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
+exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.embedRefinedTextSchema = exports.refineTextSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.getTagsSchema = exports.questionSchema = exports.generateDocxSchema = exports.resetEmbedFlagSchema = exports.updateReportTagsProcessedSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
 exports.uuidSchema = joi_1.default.object({
     uuid: joi_1.default.string().required(),
@@ -147,6 +147,15 @@ exports.createEmbeddingsSchema = joi_1.default.object({
     document_url: joi_1.default.string().required(),
     document_id: joi_1.default.string().required(),
     file_type: joi_1.default.string().required(),
+});
+exports.refineTextSchema = joi_1.default.object({
+    original_text: joi_1.default.string().required(),
+    document_id: joi_1.default.string().required(),
+});
+exports.embedRefinedTextSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    document_id: joi_1.default.string().required(),
+    textToEmbed: joi_1.default.string().required(),
 });
 exports.emailSchema = joi_1.default.object({
     email: joi_1.default.string().required(),

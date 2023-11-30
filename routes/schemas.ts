@@ -166,6 +166,17 @@ export const createEmbeddingsSchema = Joi.object({
   file_type: Joi.string().required(),
 });
 
+export const refineTextSchema = Joi.object({
+  original_text: Joi.string().required(),
+  document_id: Joi.string().required(),
+});
+
+export const embedRefinedTextSchema = Joi.object({
+  user_id: Joi.string().required(),
+  document_id: Joi.string().required(),
+  textToEmbed: Joi.string().required(),
+});
+
 export const emailSchema = Joi.object({
   email: Joi.string().required(),
 });

@@ -10,6 +10,8 @@ import { AuthenticateManageToken, addToAudit } from "./helper";
 import {
   createIndexSchema,
   createEmbeddingsSchema,
+  refineTextSchema,
+  embedRefinedTextSchema,
   questionSchema,
   generateDocxSchema,
   getTagsSchema,
@@ -22,6 +24,9 @@ import createIndex from "../ai/pinecone/createIndex";
 import { queryPineconeVectorStoreAndQueryLLM } from "../ai/pinecone/queryPinecone";
 import GenerateDocx from "../ai/doc-generation/docx";
 import { v4 as uuidv4 } from "uuid";
+import extractText from "../ai/image-to-text/extract-text";
+import refineText from "../ai/image-to-text/refine-text";
+import embedText from "../ai/image-to-text/embed-text";
 
 const router = Router();
 
@@ -347,31 +352,30 @@ router.post(
             file_type,
             data[0]?.saved_filename
           );
+
+          if (!result) {
+            return res.json({
+              error: true,
+              msg: "failed to EMBED file",
+            });
+          }
         } else if (type_of_embedding === "image") {
-          result = await createImageEmbeddings(
-            client,
-            process.env.PINECONE_INDEX_NAME,
-            user_id,
-            document_url,
-            document_id,
-            file_type,
+          result = await extractText(
             data[0]?.saved_filename,
             additional_context
           );
-
           console.log("textract = ", result);
 
-          // RES RETURN THE TEXT
-
-          // ON THE NEW API CALL DO THE documentModel.findOneAndUpdate(
-          // update embedding_created + image_to_text_content= result
-        }
-
-        if (!result) {
-          return res.json({
-            error: true,
-            msg: "failed to EMBED file",
-          });
+          if (result) {
+            return res.json({
+              result,
+            });
+          } else {
+            return res.json({
+              error: true,
+              msg: "failed to EMBED file",
+            });
+          }
         }
 
         await documentModel.findOneAndUpdate(
@@ -394,6 +398,95 @@ router.post(
       return res.json({
         error: true,
         msg: "failed to embed data",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/aiadviser/refine-text",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await refineTextSchema.validateAsync(req.body);
+      const { original_text, document_id } = req.body;
+
+      const results = await refineText(original_text);
+      const { originalText, refined } = results;
+
+      await documentModel.findOneAndUpdate(
+        { _id: document_id },
+        {
+          image_to_text_content: refined,
+          image_to_text_content_original: originalText,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+
+      return res.json({
+        msg: "successfully refined and stored text",
+      });
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to refine the text",
+      });
+    }
+  }
+);
+
+router.post(
+  "/v1/aiadviser/embed-refined-text",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await embedRefinedTextSchema.validateAsync(req.body);
+      const { user_id, document_id, textToEmbed } = req.body;
+
+      const data = await documentModel
+        .find({
+          _id: document_id,
+        })
+        .lean()
+        .exec();
+
+      if (!data.length) {
+        return res.json({
+          error: true,
+          msg: "invalid Doc Id",
+        });
+      }
+
+      const saved_filename = data[0]?.saved_filename;
+
+      const client = new Pinecone({
+        apiKey: process.env.PINECONE_API_KEY,
+        environment: process.env.PINECONE_ENVIRONMENT,
+      });
+
+      await embedText(
+        client,
+        process.env.PINECONE_INDEX_NAME,
+        user_id,
+        document_id,
+        saved_filename,
+        textToEmbed
+      );
+
+      return res.json({
+        msg: "Embedding complete",
+      });
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to refine the text",
       });
     }
   }
