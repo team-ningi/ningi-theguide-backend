@@ -61,6 +61,17 @@ router.post(
   nocache(),
   AuthenticateManageToken(),
   async (req, res) => {
+    res.writeHead(200, {
+      "Content-Type": "text/plain",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    });
+
+    const heartbeatInterval = setInterval(() => {
+      res.write(" ");
+      res.flush();
+      console.log("processing...");
+    }, 15000);
     try {
       await questionSchema.validateAsync(req.body);
       const { question, documentIds } = req.body;
@@ -97,12 +108,14 @@ router.post(
       };
       await addToAudit(req, auditData);
 
+      clearInterval(heartbeatInterval);
       return res.json({
         question,
         answer: `${result}`,
       });
     } catch (e) {
       console.log(e);
+      clearInterval(heartbeatInterval);
       return res.json({
         error: true,
         msg: "failed to query data",
@@ -116,6 +129,7 @@ router.post(
   nocache(),
   AuthenticateManageToken(),
   async (req, res) => {
+    // THIS IS NOT IN USE ... IN FAVOR OF /query-get-tags-single-chunk
     try {
       await getTagsSchema.validateAsync(req.body);
       const { tags, documentIds, additionalPrompt, reportId } = req.body;
@@ -223,6 +237,18 @@ router.post(
   nocache(),
   AuthenticateManageToken(),
   async (req, res) => {
+    res.writeHead(200, {
+      "Content-Type": "text/plain",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    });
+
+    const heartbeatInterval = setInterval(() => {
+      res.write(" ");
+      res.flush();
+      console.log("processing...");
+    }, 15000);
+
     try {
       await getTagsSchema.validateAsync(req.body);
       const { tags, documentIds, additionalPrompt, reportId } = req.body;
@@ -286,10 +312,12 @@ router.post(
         }
       );
 
+      clearInterval(heartbeatInterval);
       return res.json({
         message: "finished resolving tags",
       });
     } catch (e) {
+      clearInterval(heartbeatInterval);
       return res.json({
         error: true,
         msg: "failed to resolve tags",
@@ -303,6 +331,18 @@ router.post(
   nocache(),
   AuthenticateManageToken(),
   async (req, res) => {
+    res.writeHead(200, {
+      "Content-Type": "text/plain",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    });
+
+    const heartbeatInterval = setInterval(() => {
+      res.write(" ");
+      res.flush();
+      console.log("processing...");
+    }, 15000);
+
     try {
       await createEmbeddingsSchema.validateAsync(req.body);
       const {
@@ -323,6 +363,7 @@ router.post(
         .exec();
 
       if (data.length) {
+        clearInterval(heartbeatInterval);
         return res.json({
           error: true,
           msg: "Embedding created already for this document",
@@ -354,6 +395,7 @@ router.post(
           );
 
           if (!result) {
+            clearInterval(heartbeatInterval);
             return res.json({
               error: true,
               msg: "failed to EMBED file",
@@ -367,10 +409,12 @@ router.post(
           console.log("textract = ", result);
 
           if (result) {
+            clearInterval(heartbeatInterval);
             return res.json({
               result,
             });
           } else {
+            clearInterval(heartbeatInterval);
             return res.json({
               error: true,
               msg: "failed to EMBED file",
@@ -389,12 +433,14 @@ router.post(
           }
         );
 
+        clearInterval(heartbeatInterval);
         return res.json({
           msg: "Embedding complete",
         });
       }
     } catch (e) {
       console.log(e);
+      clearInterval(heartbeatInterval);
       return res.json({
         error: true,
         msg: "failed to embed data",
@@ -408,6 +454,18 @@ router.post(
   nocache(),
   AuthenticateManageToken(),
   async (req, res) => {
+    res.writeHead(200, {
+      "Content-Type": "text/plain",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    });
+
+    const heartbeatInterval = setInterval(() => {
+      res.write(" ");
+      res.flush();
+      console.log("processing...");
+    }, 15000);
+
     try {
       await refineTextSchema.validateAsync(req.body);
       const { original_text, document_id } = req.body;
@@ -427,11 +485,11 @@ router.post(
         }
       );
 
-      return res.json({
-        msg: "successfully refined and stored text",
-      });
+      clearInterval(heartbeatInterval);
+      res.end("successfully refined and stored text");
     } catch (e) {
       console.log(e);
+      clearInterval(heartbeatInterval);
       return res.json({
         error: true,
         msg: "failed to refine the text",
@@ -545,57 +603,35 @@ router.post(
 );
 
 router.post("/v1/aiadviser/testing-timeouts", nocache(), async (req, res) => {
+  function someLongRunningProcess() {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve("Process completed.🚀");
+      }, 90000);
+    });
+  }
+
+  console.log("**>>> starting test long running function");
+  res.writeHead(200, {
+    "Content-Type": "text/plain",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
+
+  const heartbeatInterval = setInterval(() => {
+    res.write(" ");
+    res.flush();
+    console.log("heart beat");
+  }, 15000);
+
+  // Your long-running process here
   try {
-    console.log("**>>> starting test route async await2");
-    // Necessary headers to keep the connection open
-    res.writeHead(200, {
-      "Content-Type": "text/plain",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    });
-
-    // Send heartbeat every 15 seconds
-    const heartbeatInterval = setInterval(() => {
-      res.write(" "); // Whitespace works as a heartbeat
-      res.flush(); // Ensure the single space gets sent out promptly
-      console.log("heart beat");
-    }, 15000);
-
-    // Your long-running process here
-    try {
-      await someLongRunningProcess();
-      clearInterval(heartbeatInterval);
-      res.end(result); // Send the final result back to client
-    } catch (e) {
-      clearInterval(heartbeatInterval);
-      res.status(500).end(e.message); // Handle errors accordingly
-    }
-
-    // someLongRunningProcess()
-    //   .then((result) => {
-    //     clearInterval(heartbeatInterval);
-    //     res.end(result); // Send the final result back to client
-    //   })
-    //   .catch((err) => {
-    //     clearInterval(heartbeatInterval);
-    //     res.status(500).end(err.message); // Handle errors accordingly
-    //   });
-
-    // Replace this function with your actual long-running task
-    function someLongRunningProcess() {
-      return new Promise((resolve, reject) => {
-        // Simulate long process
-        setTimeout(() => {
-          resolve("Process completed.🚀");
-        }, 90000);
-      });
-    }
+    await someLongRunningProcess();
+    clearInterval(heartbeatInterval);
+    res.end("result");
   } catch (e) {
-    console.log(e);
-    return res.json({
-      error: true,
-      msg: "failed to query data",
-    });
+    clearInterval(heartbeatInterval);
+    res.status(500).end(e.message);
   }
 });
 export default router;

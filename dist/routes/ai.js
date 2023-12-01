@@ -39,6 +39,16 @@ router.get("/v1/aiadviser/in-memory-ai-text", (0, nocache_1.default)(), (0, help
     });
 });
 router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    res.writeHead(200, {
+        "Content-Type": "text/plain",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+    });
+    const heartbeatInterval = setInterval(() => {
+        res.write(" ");
+        res.flush();
+        console.log("processing...");
+    }, 15000);
     try {
         await schemas_1.questionSchema.validateAsync(req.body);
         const { question, documentIds } = req.body;
@@ -64,6 +74,7 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
             },
         };
         await (0, helper_1.addToAudit)(req, auditData);
+        clearInterval(heartbeatInterval);
         return res.json({
             question,
             answer: `${result}`,
@@ -71,6 +82,7 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
     }
     catch (e) {
         console.log(e);
+        clearInterval(heartbeatInterval);
         return res.json({
             error: true,
             msg: "failed to query data",
@@ -78,6 +90,7 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
     }
 });
 router.post("/v1/aiadviser/query-get-tags", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    // THIS IS NOT IN USE ... IN FAVOR OF /query-get-tags-single-chunk
     try {
         await schemas_1.getTagsSchema.validateAsync(req.body);
         const { tags, documentIds, additionalPrompt, reportId } = req.body;
@@ -146,6 +159,16 @@ router.post("/v1/aiadviser/query-get-tags", (0, nocache_1.default)(), (0, helper
     }
 });
 router.post("/v1/aiadviser/query-get-tags-single-chunk", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    res.writeHead(200, {
+        "Content-Type": "text/plain",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+    });
+    const heartbeatInterval = setInterval(() => {
+        res.write(" ");
+        res.flush();
+        console.log("processing...");
+    }, 15000);
     try {
         await schemas_1.getTagsSchema.validateAsync(req.body);
         const { tags, documentIds, additionalPrompt, reportId } = req.body;
@@ -187,11 +210,13 @@ router.post("/v1/aiadviser/query-get-tags-single-chunk", (0, nocache_1.default)(
             new: true,
             upsert: false,
         });
+        clearInterval(heartbeatInterval);
         return res.json({
             message: "finished resolving tags",
         });
     }
     catch (e) {
+        clearInterval(heartbeatInterval);
         return res.json({
             error: true,
             msg: "failed to resolve tags",
@@ -199,6 +224,16 @@ router.post("/v1/aiadviser/query-get-tags-single-chunk", (0, nocache_1.default)(
     }
 });
 router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    res.writeHead(200, {
+        "Content-Type": "text/plain",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+    });
+    const heartbeatInterval = setInterval(() => {
+        res.write(" ");
+        res.flush();
+        console.log("processing...");
+    }, 15000);
     try {
         await schemas_1.createEmbeddingsSchema.validateAsync(req.body);
         const { user_id, document_url, document_id, file_type, additional_context, type_of_embedding, } = req.body;
@@ -210,6 +245,7 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
             .lean()
             .exec();
         if (data.length) {
+            clearInterval(heartbeatInterval);
             return res.json({
                 error: true,
                 msg: "Embedding created already for this document",
@@ -230,6 +266,7 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
             if (type_of_embedding === "document") {
                 result = await (0, createEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename);
                 if (!result) {
+                    clearInterval(heartbeatInterval);
                     return res.json({
                         error: true,
                         msg: "failed to EMBED file",
@@ -240,11 +277,13 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
                 result = await (0, extract_text_1.default)(data[0]?.saved_filename, additional_context);
                 console.log("textract = ", result);
                 if (result) {
+                    clearInterval(heartbeatInterval);
                     return res.json({
                         result,
                     });
                 }
                 else {
+                    clearInterval(heartbeatInterval);
                     return res.json({
                         error: true,
                         msg: "failed to EMBED file",
@@ -257,6 +296,7 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
                 new: true,
                 upsert: false,
             });
+            clearInterval(heartbeatInterval);
             return res.json({
                 msg: "Embedding complete",
             });
@@ -264,6 +304,7 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
     }
     catch (e) {
         console.log(e);
+        clearInterval(heartbeatInterval);
         return res.json({
             error: true,
             msg: "failed to embed data",
@@ -271,6 +312,16 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
     }
 });
 router.post("/v1/aiadviser/refine-text", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    res.writeHead(200, {
+        "Content-Type": "text/plain",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+    });
+    const heartbeatInterval = setInterval(() => {
+        res.write(" ");
+        res.flush();
+        console.log("processing...");
+    }, 15000);
     try {
         await schemas_1.refineTextSchema.validateAsync(req.body);
         const { original_text, document_id } = req.body;
@@ -283,12 +334,12 @@ router.post("/v1/aiadviser/refine-text", (0, nocache_1.default)(), (0, helper_1.
             new: true,
             upsert: false,
         });
-        return res.json({
-            msg: "successfully refined and stored text",
-        });
+        clearInterval(heartbeatInterval);
+        res.end("successfully refined and stored text");
     }
     catch (e) {
         console.log(e);
+        clearInterval(heartbeatInterval);
         return res.json({
             error: true,
             msg: "failed to refine the text",
@@ -368,55 +419,33 @@ router.post("/v1/aiadviser/docx-generation", (0, nocache_1.default)(), (0, helpe
     }
 });
 router.post("/v1/aiadviser/testing-timeouts", (0, nocache_1.default)(), async (req, res) => {
-    try {
-        console.log("**>>> starting test route async await2");
-        // Necessary headers to keep the connection open
-        res.writeHead(200, {
-            "Content-Type": "text/plain",
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive",
+    function someLongRunningProcess() {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve("Process completed.🚀");
+            }, 90000);
         });
-        // Send heartbeat every 15 seconds
-        const heartbeatInterval = setInterval(() => {
-            res.write(" "); // Whitespace works as a heartbeat
-            res.flush(); // Ensure the single space gets sent out promptly
-            console.log("heart beat");
-        }, 15000);
-        // Your long-running process here
-        try {
-            await someLongRunningProcess();
-            clearInterval(heartbeatInterval);
-            res.end(result); // Send the final result back to client
-        }
-        catch (e) {
-            clearInterval(heartbeatInterval);
-            res.status(500).end(e.message); // Handle errors accordingly
-        }
-        // someLongRunningProcess()
-        //   .then((result) => {
-        //     clearInterval(heartbeatInterval);
-        //     res.end(result); // Send the final result back to client
-        //   })
-        //   .catch((err) => {
-        //     clearInterval(heartbeatInterval);
-        //     res.status(500).end(err.message); // Handle errors accordingly
-        //   });
-        // Replace this function with your actual long-running task
-        function someLongRunningProcess() {
-            return new Promise((resolve, reject) => {
-                // Simulate long process
-                setTimeout(() => {
-                    resolve("Process completed.🚀");
-                }, 90000);
-            });
-        }
+    }
+    console.log("**>>> starting test long running function");
+    res.writeHead(200, {
+        "Content-Type": "text/plain",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+    });
+    const heartbeatInterval = setInterval(() => {
+        res.write(" ");
+        res.flush();
+        console.log("heart beat");
+    }, 15000);
+    // Your long-running process here
+    try {
+        await someLongRunningProcess();
+        clearInterval(heartbeatInterval);
+        res.end("result");
     }
     catch (e) {
-        console.log(e);
-        return res.json({
-            error: true,
-            msg: "failed to query data",
-        });
+        clearInterval(heartbeatInterval);
+        res.status(500).end(e.message);
     }
 });
 exports.default = router;
