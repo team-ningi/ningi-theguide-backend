@@ -369,7 +369,7 @@ router.post("/v1/aiadviser/docx-generation", (0, nocache_1.default)(), (0, helpe
 });
 router.post("/v1/aiadviser/testing-timeouts", (0, nocache_1.default)(), async (req, res) => {
     try {
-        console.log("**>>> starting test route");
+        console.log("**>>> starting test route async await");
         // Necessary headers to keep the connection open
         res.writeHead(200, {
             "Content-Type": "text/plain",
@@ -383,21 +383,30 @@ router.post("/v1/aiadviser/testing-timeouts", (0, nocache_1.default)(), async (r
             console.log("heart beat");
         }, 15000);
         // Your long-running process here
-        someLongRunningProcess()
-            .then((result) => {
+        try {
+            await someLongRunningProcess();
             clearInterval(heartbeatInterval);
             res.end(result); // Send the final result back to client
-        })
-            .catch((err) => {
+        }
+        catch (e) {
             clearInterval(heartbeatInterval);
             res.status(500).end(err.message); // Handle errors accordingly
-        });
+        }
+        // someLongRunningProcess()
+        //   .then((result) => {
+        //     clearInterval(heartbeatInterval);
+        //     res.end(result); // Send the final result back to client
+        //   })
+        //   .catch((err) => {
+        //     clearInterval(heartbeatInterval);
+        //     res.status(500).end(err.message); // Handle errors accordingly
+        //   });
         // Replace this function with your actual long-running task
         function someLongRunningProcess() {
             return new Promise((resolve, reject) => {
                 // Simulate long process
                 setTimeout(() => {
-                    resolve("Process completed.");
+                    resolve("Process completed.🚀");
                 }, 90000);
             });
         }
