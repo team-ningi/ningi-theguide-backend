@@ -546,6 +546,7 @@ router.post(
 
 router.post("/v1/aiadviser/testing-timeouts", nocache(), async (req, res) => {
   try {
+    console.log("**>>> starting test route");
     // Necessary headers to keep the connection open
     res.writeHead(200, {
       "Content-Type": "text/plain",

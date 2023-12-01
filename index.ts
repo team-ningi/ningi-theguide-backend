@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import dotenv from "dotenv";
 import cors from "cors";
+import compression from "compression";
 import userRoutes from "./routes/users";
 import documentRoutes from "./routes/documents";
 import templateRoutes from "./routes/templates";
@@ -26,6 +27,7 @@ app.use(helmet());
 app.use(json());
 app.use(cookieParser());
 app.use(errorHandler);
+app.use(compression());
 
 app.get("/", (req, res) => {
   return res.send("Adviser API");

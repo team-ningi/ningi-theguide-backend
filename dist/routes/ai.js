@@ -369,6 +369,7 @@ router.post("/v1/aiadviser/docx-generation", (0, nocache_1.default)(), (0, helpe
 });
 router.post("/v1/aiadviser/testing-timeouts", (0, nocache_1.default)(), async (req, res) => {
     try {
+        console.log("**>>> starting test route");
         // Necessary headers to keep the connection open
         res.writeHead(200, {
             "Content-Type": "text/plain",

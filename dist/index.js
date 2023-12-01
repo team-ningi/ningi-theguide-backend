@@ -10,6 +10,7 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const helmet_1 = __importDefault(require("helmet"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const cors_1 = __importDefault(require("cors"));
+const compression_1 = __importDefault(require("compression"));
 const users_1 = __importDefault(require("./routes/users"));
 const documents_1 = __importDefault(require("./routes/documents"));
 const templates_1 = __importDefault(require("./routes/templates"));
@@ -27,6 +28,7 @@ app.use((0, helmet_1.default)());
 app.use((0, body_parser_1.json)());
 app.use((0, cookie_parser_1.default)());
 app.use(errors_1.errorHandler);
+app.use((0, compression_1.default)());
 app.get("/", (req, res) => {
     return res.send("Adviser API");
 });
