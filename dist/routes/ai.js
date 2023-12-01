@@ -369,7 +369,7 @@ router.post("/v1/aiadviser/docx-generation", (0, nocache_1.default)(), (0, helpe
 });
 router.post("/v1/aiadviser/testing-timeouts", (0, nocache_1.default)(), async (req, res) => {
     try {
-        console.log("**>>> starting test route async await");
+        console.log("**>>> starting test route async await2");
         // Necessary headers to keep the connection open
         res.writeHead(200, {
             "Content-Type": "text/plain",
@@ -390,7 +390,7 @@ router.post("/v1/aiadviser/testing-timeouts", (0, nocache_1.default)(), async (r
         }
         catch (e) {
             clearInterval(heartbeatInterval);
-            res.status(500).end(err.message); // Handle errors accordingly
+            res.status(500).end(e.message); // Handle errors accordingly
         }
         // someLongRunningProcess()
         //   .then((result) => {

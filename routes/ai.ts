@@ -546,7 +546,7 @@ router.post(
 
 router.post("/v1/aiadviser/testing-timeouts", nocache(), async (req, res) => {
   try {
-    console.log("**>>> starting test route async await");
+    console.log("**>>> starting test route async await2");
     // Necessary headers to keep the connection open
     res.writeHead(200, {
       "Content-Type": "text/plain",
@@ -568,7 +568,7 @@ router.post("/v1/aiadviser/testing-timeouts", nocache(), async (req, res) => {
       res.end(result); // Send the final result back to client
     } catch (e) {
       clearInterval(heartbeatInterval);
-      res.status(500).end(err.message); // Handle errors accordingly
+      res.status(500).end(e.message); // Handle errors accordingly
     }
 
     // someLongRunningProcess()
