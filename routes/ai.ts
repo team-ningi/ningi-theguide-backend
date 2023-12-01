@@ -109,17 +109,21 @@ router.post(
       await addToAudit(req, auditData);
 
       clearInterval(heartbeatInterval);
-      return res.json({
-        question,
-        answer: `${result}`,
-      });
+      return res.end(
+        JSON.stringify({
+          question,
+          answer: `${result}`,
+        })
+      );
     } catch (e) {
       console.log(e);
       clearInterval(heartbeatInterval);
-      return res.json({
-        error: true,
-        msg: "failed to query data",
-      });
+      return res.end(
+        JSON.stringify({
+          error: true,
+          msg: "failed to query data",
+        })
+      );
     }
   }
 );
@@ -313,15 +317,19 @@ router.post(
       );
 
       clearInterval(heartbeatInterval);
-      return res.json({
-        message: "finished resolving tags",
-      });
+      return res.end(
+        JSON.stringify({
+          message: "finished resolving tags",
+        })
+      );
     } catch (e) {
       clearInterval(heartbeatInterval);
-      return res.json({
-        error: true,
-        msg: "failed to resolve tags",
-      });
+      return res.end(
+        JSON.stringify({
+          error: true,
+          msg: "failed to resolve tags",
+        })
+      );
     }
   }
 );
@@ -364,10 +372,12 @@ router.post(
 
       if (data.length) {
         clearInterval(heartbeatInterval);
-        return res.json({
-          error: true,
-          msg: "Embedding created already for this document",
-        });
+        return res.end(
+          JSON.stringify({
+            error: true,
+            msg: "Embedding created already for this document",
+          })
+        );
       } else {
         const client = new Pinecone({
           apiKey: process.env.PINECONE_API_KEY,
@@ -396,10 +406,12 @@ router.post(
 
           if (!result) {
             clearInterval(heartbeatInterval);
-            return res.json({
-              error: true,
-              msg: "failed to EMBED file",
-            });
+            return res.end(
+              JSON.stringify({
+                error: true,
+                msg: "failed to EMBED file",
+              })
+            );
           }
         } else if (type_of_embedding === "image") {
           result = await extractText(
@@ -410,15 +422,19 @@ router.post(
 
           if (result) {
             clearInterval(heartbeatInterval);
-            return res.json({
-              result,
-            });
+            return res.end(
+              JSON.stringify({
+                result,
+              })
+            );
           } else {
             clearInterval(heartbeatInterval);
-            return res.json({
-              error: true,
-              msg: "failed to EMBED file",
-            });
+            return res.end(
+              JSON.stringify({
+                error: true,
+                msg: "failed to EMBED file",
+              })
+            );
           }
         }
 
@@ -434,17 +450,21 @@ router.post(
         );
 
         clearInterval(heartbeatInterval);
-        return res.json({
-          msg: "Embedding complete",
-        });
+        return res.end(
+          JSON.stringify({
+            msg: "Embedding complete",
+          })
+        );
       }
     } catch (e) {
       console.log(e);
       clearInterval(heartbeatInterval);
-      return res.json({
-        error: true,
-        msg: "failed to embed data",
-      });
+      return res.end(
+        JSON.stringify({
+          error: true,
+          msg: "failed to embed data",
+        })
+      );
     }
   }
 );
@@ -490,10 +510,12 @@ router.post(
     } catch (e) {
       console.log(e);
       clearInterval(heartbeatInterval);
-      return res.json({
-        error: true,
-        msg: "failed to refine the text",
-      });
+      return res.end(
+        JSON.stringify({
+          error: true,
+          msg: "failed to refine the text",
+        })
+      );
     }
   }
 );

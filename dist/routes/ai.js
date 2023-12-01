@@ -75,18 +75,18 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
         };
         await (0, helper_1.addToAudit)(req, auditData);
         clearInterval(heartbeatInterval);
-        return res.json({
+        return res.end(JSON.stringify({
             question,
             answer: `${result}`,
-        });
+        }));
     }
     catch (e) {
         console.log(e);
         clearInterval(heartbeatInterval);
-        return res.json({
+        return res.end(JSON.stringify({
             error: true,
             msg: "failed to query data",
-        });
+        }));
     }
 });
 router.post("/v1/aiadviser/query-get-tags", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
@@ -211,16 +211,16 @@ router.post("/v1/aiadviser/query-get-tags-single-chunk", (0, nocache_1.default)(
             upsert: false,
         });
         clearInterval(heartbeatInterval);
-        return res.json({
+        return res.end(JSON.stringify({
             message: "finished resolving tags",
-        });
+        }));
     }
     catch (e) {
         clearInterval(heartbeatInterval);
-        return res.json({
+        return res.end(JSON.stringify({
             error: true,
             msg: "failed to resolve tags",
-        });
+        }));
     }
 });
 router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
@@ -246,10 +246,10 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
             .exec();
         if (data.length) {
             clearInterval(heartbeatInterval);
-            return res.json({
+            return res.end(JSON.stringify({
                 error: true,
                 msg: "Embedding created already for this document",
-            });
+            }));
         }
         else {
             const client = new pinecone_1.Pinecone({
@@ -267,10 +267,10 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
                 result = await (0, createEmbeddings_1.default)(client, process.env.PINECONE_INDEX_NAME, user_id, document_url, document_id, file_type, data[0]?.saved_filename);
                 if (!result) {
                     clearInterval(heartbeatInterval);
-                    return res.json({
+                    return res.end(JSON.stringify({
                         error: true,
                         msg: "failed to EMBED file",
-                    });
+                    }));
                 }
             }
             else if (type_of_embedding === "image") {
@@ -278,16 +278,16 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
                 console.log("textract = ", result);
                 if (result) {
                     clearInterval(heartbeatInterval);
-                    return res.json({
+                    return res.end(JSON.stringify({
                         result,
-                    });
+                    }));
                 }
                 else {
                     clearInterval(heartbeatInterval);
-                    return res.json({
+                    return res.end(JSON.stringify({
                         error: true,
                         msg: "failed to EMBED file",
-                    });
+                    }));
                 }
             }
             await document_model_1.documentModel.findOneAndUpdate({ _id: document_id }, {
@@ -297,18 +297,18 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
                 upsert: false,
             });
             clearInterval(heartbeatInterval);
-            return res.json({
+            return res.end(JSON.stringify({
                 msg: "Embedding complete",
-            });
+            }));
         }
     }
     catch (e) {
         console.log(e);
         clearInterval(heartbeatInterval);
-        return res.json({
+        return res.end(JSON.stringify({
             error: true,
             msg: "failed to embed data",
-        });
+        }));
     }
 });
 router.post("/v1/aiadviser/refine-text", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
@@ -340,10 +340,10 @@ router.post("/v1/aiadviser/refine-text", (0, nocache_1.default)(), (0, helper_1.
     catch (e) {
         console.log(e);
         clearInterval(heartbeatInterval);
-        return res.json({
+        return res.end(JSON.stringify({
             error: true,
             msg: "failed to refine the text",
-        });
+        }));
     }
 });
 router.post("/v1/aiadviser/embed-refined-text", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
