@@ -48,7 +48,7 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
         res.write(" ");
         res.flush();
         console.log("processing...");
-    }, 15000);
+    }, 10000);
     try {
         await schemas_1.questionSchema.validateAsync(req.body);
         const { question, documentIds } = req.body;
@@ -168,7 +168,7 @@ router.post("/v1/aiadviser/query-get-tags-single-chunk", (0, nocache_1.default)(
         res.write(" ");
         res.flush();
         console.log("processing...");
-    }, 15000);
+    }, 10000);
     try {
         await schemas_1.getTagsSchema.validateAsync(req.body);
         const { tags, documentIds, additionalPrompt, reportId } = req.body;
@@ -233,7 +233,7 @@ router.post("/v1/aiadviser/create-embeddings", (0, nocache_1.default)(), (0, hel
         res.write(" ");
         res.flush();
         console.log("processing...");
-    }, 15000);
+    }, 10000);
     try {
         await schemas_1.createEmbeddingsSchema.validateAsync(req.body);
         const { user_id, document_url, document_id, file_type, additional_context, type_of_embedding, } = req.body;
@@ -321,7 +321,7 @@ router.post("/v1/aiadviser/refine-text", (0, nocache_1.default)(), (0, helper_1.
         res.write(" ");
         res.flush();
         console.log("processing...");
-    }, 15000);
+    }, 10000);
     try {
         await schemas_1.refineTextSchema.validateAsync(req.body);
         const { original_text, document_id } = req.body;
@@ -436,7 +436,7 @@ router.post("/v1/aiadviser/testing-timeouts", (0, nocache_1.default)(), async (r
         res.write(" ");
         res.flush();
         console.log("heart beat");
-    }, 15000);
+    }, 10000);
     // Your long-running process here
     try {
         await someLongRunningProcess();

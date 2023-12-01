@@ -71,7 +71,7 @@ router.post(
       res.write(" ");
       res.flush();
       console.log("processing...");
-    }, 15000);
+    }, 10000);
     try {
       await questionSchema.validateAsync(req.body);
       const { question, documentIds } = req.body;
@@ -251,7 +251,7 @@ router.post(
       res.write(" ");
       res.flush();
       console.log("processing...");
-    }, 15000);
+    }, 10000);
 
     try {
       await getTagsSchema.validateAsync(req.body);
@@ -349,7 +349,7 @@ router.post(
       res.write(" ");
       res.flush();
       console.log("processing...");
-    }, 15000);
+    }, 10000);
 
     try {
       await createEmbeddingsSchema.validateAsync(req.body);
@@ -484,7 +484,7 @@ router.post(
       res.write(" ");
       res.flush();
       console.log("processing...");
-    }, 15000);
+    }, 10000);
 
     try {
       await refineTextSchema.validateAsync(req.body);
@@ -644,7 +644,7 @@ router.post("/v1/aiadviser/testing-timeouts", nocache(), async (req, res) => {
     res.write(" ");
     res.flush();
     console.log("heart beat");
-  }, 15000);
+  }, 10000);
 
   // Your long-running process here
   try {
