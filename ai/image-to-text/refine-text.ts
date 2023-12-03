@@ -9,13 +9,17 @@ dotenv.config();
 const issueTextArray = [
   "I'm sorry",
   "Im sorry",
-  "provided text is fragmented",
   "I dont know",
   "I don't know",
+  "provided text is fragmented",
   "unclear and scattered",
   "impossible to decipher",
   "lack necessary context",
   "lacks clarity",
+  "I'm afraid",
+  "Im afraid",
+  "not feasible to rewrite",
+  "disjointed information",
 ];
 
 let errors = 0;
@@ -65,6 +69,9 @@ export default async (originalText: string) => {
         break;
       }
     }
+
+    attempts = 0;
+    errors = 0;
 
     return {
       originalText,
