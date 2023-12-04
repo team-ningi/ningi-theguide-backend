@@ -4,6 +4,10 @@ import { loadQAStuffChain } from "langchain/chains";
 import { Document } from "langchain/document";
 import { Pinecone } from "@pinecone-database/pinecone";
 
+let errors = 0;
+let attempts = 0;
+let maxTries = 4;
+
 export const queryPineconeVectorStoreAndQueryLLM = async (
   client: Pinecone,
   indexName: string,
@@ -47,18 +51,39 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
     try {
       return JSON.parse(result.text);
     } catch (error) {
-      try {
-        console.error("retrying to generate tags, ", error);
-        const result = await chain.call({
-          input_documents: [
-            new Document({ pageContent: concatenatedPageContent }),
-          ],
-          question: question,
-        });
-        return JSON.parse(result.text);
-      } catch (error) {
-        console.error("Error JSON parsing on retry, ", error); // dont return , will break the tagResult object
-        throw new Error("Failed to generate tags for report");
+      console.error("error on initial parse attempt: ", error);
+      errors++;
+
+      while (errors > 0 && attempts < maxTries) {
+        try {
+          await new Promise((resolve) => setTimeout(resolve, 600));
+          console.log(`retrying tags attempt :  ${attempts} `);
+
+          const result = await chain.call({
+            input_documents: [
+              new Document({ pageContent: concatenatedPageContent }),
+            ],
+            question: question,
+          });
+          const JSONResult = JSON.parse(result.text);
+
+          attempts = 0;
+          errors = 0;
+          return JSONResult;
+        } catch (error) {
+          errors++;
+          attempts++;
+          console.error("Error JSON parsing on retry, ", error); // dont return , will break the tagResult object
+        }
+      }
+
+      if (maxTries >= attempts) {
+        attempts = 0;
+        errors = 0;
+
+        throw new Error(
+          "Failed to generate tags for report after maximum attempts"
+        );
       }
     }
   } else {
