@@ -44,13 +44,13 @@ const queryPineconeVectorStoreAndQueryLLM = async (client, indexName, question, 
             while (errors > 0 && attempts < maxTries) {
                 try {
                     await new Promise((resolve) => setTimeout(resolve, 600));
-                    console.log(`retrying tags attempt :  ${attempts} `);
                     const result = await chain.call({
                         input_documents: [
                             new document_1.Document({ pageContent: concatenatedPageContent }),
                         ],
                         question: question,
                     });
+                    console.log(`\n\n Answer attempt: ${attempts} = ${result.text}`);
                     const JSONResult = JSON.parse(result.text);
                     attempts = 0;
                     errors = 0;
