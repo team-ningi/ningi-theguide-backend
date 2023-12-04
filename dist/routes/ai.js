@@ -111,8 +111,8 @@ router.post("/v1/aiadviser/query-get-tags", (0, nocache_1.default)(), (0, helper
       If an answer is available for a query, respond with a JSON object in the format of {'key':'value'} 
       where 'value' is the answer. If the answer is not available for a query, provide a default response of {'key': '' } 
       replacing the value with an empty string. 
-      I only want a valid JSON object returned, i do not want any additional text explaining why some of the values are empty strings, 
-        ONLY return the valid json object.
+      Respond to each query with a JSON object in the format {'key': 'value'}.
+      If the information for a query is not available or unknown, respond with {'key': 'Unknown'}.  Please do not send any other response other than a valid JSON Object even if all of the queries do not have answers, always respond with valid JSON.
        `;
         const postPromptOLD = `Return the data as an object of { 'key': 'value'}, if you dont know an answer for any individual item  
         please keep the structure of { 'key':'value' } but return the value be an empty string , do not explain to me that you could not answer becuase of lack of context just reply with '' for each individual value you can not answer. 
