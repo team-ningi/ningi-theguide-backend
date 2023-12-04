@@ -183,7 +183,7 @@ router.put("/v1/aiadviser/update-report-tags-processed", (0, nocache_1.default)(
                 msg: "No report found",
             });
         }
-        console.log({ report });
+        // console.log({ report });
         const result = await reports_model_1.reportsModel.findOneAndUpdate({ _id: report_id }, {
             tag_chunks_to_process: tag_chunks_to_process || report[0]?.tag_chunks_to_process,
             tag_chunks_processed: tag_chunks_processed || report[0]?.tag_chunks_processed,
