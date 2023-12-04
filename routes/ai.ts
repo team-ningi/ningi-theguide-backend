@@ -160,7 +160,7 @@ router.post(
       replacing the value with an empty string. 
       Respond to each query with a JSON object in the format {'key': 'value'}.
       If the information for a query is not available or unknown, respond with {'key': 'Unknown'}.  Please do not send any other response other than a valid JSON Object even if all of the queries do not have answers, always respond with valid JSON.
-       `;
+      `;
 
       const postPromptOLD = `Return the data as an object of { 'key': 'value'}, if you dont know an answer for any individual item  
         please keep the structure of { 'key':'value' } but return the value be an empty string , do not explain to me that you could not answer becuase of lack of context just reply with '' for each individual value you can not answer. 
