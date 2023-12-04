@@ -30,6 +30,7 @@ const queryPineconeVectorStoreAndQueryLLM = async (client, indexName, question, 
             input_documents: [new document_1.Document({ pageContent: concatenatedPageContent })],
             question: question,
         });
+        console.log(`\n\n Question: ${question}`);
         console.log(`\n\n Answer: ${result.text}`);
         if (type === "chat") {
             return result.text;

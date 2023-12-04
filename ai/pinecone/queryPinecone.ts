@@ -43,6 +43,7 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
       question: question,
     });
 
+    console.log(`\n\n Question: ${question}`);
     console.log(`\n\n Answer: ${result.text}`);
     if (type === "chat") {
       return result.text;
