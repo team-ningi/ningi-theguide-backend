@@ -155,7 +155,7 @@ router.post(
       const prePrompt =
         "I want to find out some information, everything i wish to know is inside of this Array of objects,the value in each item is an individial query.";
       const postPrompt =
-        "return the data as an object of { key: values}, if you dont know an answer for any individual item, please keep the structure of {key:value} but return the value be an empty string, if you do know the answer replace the value with the correct data, Keep context, dont return anything you are unsure of. return only the specified JSON object of {key: value}. Respond ONLY with a Valid JSON message, do not respond with text such as I Dont Know. JSON object only please with all of the keys present. If you do not have the answer for a paticular query return '' if you do know the answer put this in the place of value.";
+        "return the data as an object of { key: values}, if you dont know an answer for any individual item, please keep the structure of {key:value} but return the value be an empty string, if you do know the answer replace the value with the correct data, Keep context, dont return anything you are unsure of. return only the specified JSON object of {key: value}. Respond ONLY with a Valid JSON message, do not respond with text such as I Dont Know. JSON object only please with all of the keys present. If you do not have the answer for a paticular query return '' if you do know the answer put this in the place of value. If the provided text does not contain the information required to answer a query, then simply return '' as the answer";
       let tagResults = {};
 
       const chunkArrayInGroups = (arr, size) => {
