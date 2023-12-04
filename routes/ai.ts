@@ -154,7 +154,15 @@ router.post(
 
       const prePrompt =
         "I want to find out some information, everything i wish to know is inside of this Array of objects ,the value in each item is an individial query.";
-      const postPrompt = `Return the data as an object of { 'key': 'value'}, if you dont know an answer for any individual item  
+      const postPrompt = `
+      If an answer is available for a query, respond with a JSON object in the format of {'key':'value'} 
+      where 'value' is the answer. If the answer is not available for a query, provide a default response of {'key': '' } 
+      replacing the value with an empty string. 
+      I only want a valid JSON object returned, i do not want any additional text explaining why some of the values are empty strings, 
+        ONLY return the valid json object.
+       `;
+
+      const postPromptOLD = `Return the data as an object of { 'key': 'value'}, if you dont know an answer for any individual item  
         please keep the structure of { 'key':'value' } but return the value be an empty string , do not explain to me that you could not answer becuase of lack of context just reply with '' for each individual value you can not answer. 
         If however, you do know the answer please replace the value with the correct data. Keep context, 
         dont return anything you are unsure of. Return only the specified JSON object of { 'key': 'value' }. 
@@ -165,6 +173,7 @@ router.post(
         If the details needed to answer a query is not provided, just return an empty string for that query, If you cant not answer any of the queries then just return the JSON object with all of the keys but with empty strings as the values.
         To reiterate i only want the valid JSON object returned, i do not want any additional text explaining why the values are empty strings, 
         ONLY return the valid json object, `;
+
       let tagResults = {};
 
       const chunkArrayInGroups = (arr, size) => {
