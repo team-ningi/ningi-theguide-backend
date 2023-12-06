@@ -19,9 +19,12 @@ const reports_1 = __importDefault(require("./routes/reports"));
 const ai_1 = __importDefault(require("./routes/ai"));
 const history_1 = __importDefault(require("./routes/history"));
 const testroutes_1 = __importDefault(require("./routes/testroutes"));
+const ws_1 = __importDefault(require("ws"));
+const http_1 = __importDefault(require("http"));
 dotenv_1.default.config();
 require("./setup").setup();
-const app = (0, express_1.default)();
+const app = (0, express_1.default)(); // @ts-ignore
+const server = http_1.default.createServer(app);
 const port = process.env.PORT || 8000;
 app.use((0, cors_1.default)());
 app.use((0, helmet_1.default)());
@@ -40,7 +43,15 @@ app.use(ai_1.default);
 app.use(history_1.default);
 app.use(reports_1.default);
 app.use(testroutes_1.default);
-app.listen(port, () => {
+const wss = new ws_1.default.Server({ server });
+wss.on("connection", (ws) => {
+    console.log("WebSocket connection established.");
+    ws.on("message", (message) => {
+        console.log(`Received message: ${message}`);
+        ws.send(`Echo back: ${message}`); // simple echo for demonstration
+    });
+});
+server.listen(port, () => {
     console.log(`Listening on port: ${port}`);
 });
 process.on("SIGINT", () => {

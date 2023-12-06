@@ -14,12 +14,16 @@ import reportRoutes from "./routes/reports";
 import aiRoutes from "./routes/ai";
 import historyRoutes from "./routes/history";
 import testRoutes from "./routes/testroutes";
+import WebSocket from "ws";
+import http from "http";
 
 dotenv.config();
 
 require("./setup").setup();
 
-const app: Application = express();
+const app: Application = express(); // @ts-ignore
+const server = http.createServer(app);
+
 const port = process.env.PORT || 8000;
 
 app.use(cors());
@@ -42,7 +46,16 @@ app.use(historyRoutes);
 app.use(reportRoutes);
 app.use(testRoutes);
 
-app.listen(port, () => {
+const wss = new WebSocket.Server({ server });
+wss.on("connection", (ws) => {
+  console.log("WebSocket connection established.");
+  ws.on("message", (message) => {
+    console.log(`Received message: ${message}`);
+    ws.send(`Echo back: ${message}`); // simple echo for demonstration
+  });
+});
+
+server.listen(port, () => {
   console.log(`Listening on port: ${port}`);
 });
 
