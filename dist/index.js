@@ -19,7 +19,7 @@ const reports_1 = __importDefault(require("./routes/reports"));
 const ai_1 = __importDefault(require("./routes/ai"));
 const history_1 = __importDefault(require("./routes/history"));
 const testroutes_1 = __importDefault(require("./routes/testroutes"));
-const ws_1 = __importDefault(require("ws"));
+const websocket_1 = require("./websocket");
 const http_1 = __importDefault(require("http"));
 dotenv_1.default.config();
 require("./setup").setup();
@@ -43,18 +43,33 @@ app.use(ai_1.default);
 app.use(history_1.default);
 app.use(reports_1.default);
 app.use(testroutes_1.default);
-const wss = new ws_1.default.Server({ server });
-wss.on("connection", (ws) => {
-    console.log("WebSocket connection established.");
-    ws.on("message", (message) => {
-        console.log(`Received message: ${message}`);
-        ws.send(`Echo back: ${message}`); // simple echo for demonstration
-    });
-});
 server.listen(port, () => {
     console.log(`Listening on port: ${port}`);
 });
+(0, websocket_1.setupWebSocketServer)(server);
+app.post("/trigger", (req, res) => {
+    console.log(`Amount of connections: ${websocket_1.clients.size}`);
+    let i = 1;
+    websocket_1.clients.forEach((client) => {
+        console.log(`user ${i} > uuid:  ${client?.uuid}`);
+        if (client?.webSocket.readyState === websocket_1.WebSocket.OPEN) {
+            client?.webSocket.send(JSON.stringify({
+                type: "TRIGGERED_MESSAGE",
+                payload: "Triggered from the REST API",
+                uuid: client?.uuid,
+            }));
+        }
+        i++;
+    });
+    res.status(200).send(`Amount of connections: ${websocket_1.clients.size}`);
+});
 process.on("SIGINT", () => {
-    console.log("teardown, disconnecting");
+    console.log("teardown, disconnecting ... SIGINT");
+    (0, websocket_1.closeServer)(server);
+    require("./setup").teardown(); // eslint-disable-line global-require
+});
+process.on("SIGTERM", () => {
+    console.log("teardown, disconnecting ... SIGTERM");
+    (0, websocket_1.closeServer)(server);
     require("./setup").teardown(); // eslint-disable-line global-require
 });

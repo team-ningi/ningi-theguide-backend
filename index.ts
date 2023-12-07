@@ -14,7 +14,13 @@ import reportRoutes from "./routes/reports";
 import aiRoutes from "./routes/ai";
 import historyRoutes from "./routes/history";
 import testRoutes from "./routes/testroutes";
-import WebSocket from "ws";
+import {
+  setupWebSocketServer,
+  clients,
+  closeServer,
+  WebSocket, //@ts-ignore
+} from "./websocket";
+
 import http from "http";
 
 dotenv.config();
@@ -46,20 +52,40 @@ app.use(historyRoutes);
 app.use(reportRoutes);
 app.use(testRoutes);
 
-const wss = new WebSocket.Server({ server });
-wss.on("connection", (ws) => {
-  console.log("WebSocket connection established.");
-  ws.on("message", (message) => {
-    console.log(`Received message: ${message}`);
-    ws.send(`Echo back: ${message}`); // simple echo for demonstration
-  });
-});
-
 server.listen(port, () => {
   console.log(`Listening on port: ${port}`);
 });
 
+setupWebSocketServer(server);
+app.post("/trigger", (req, res) => {
+  console.log(`Amount of connections: ${clients.size}`);
+
+  let i = 1;
+  clients.forEach((client: any) => {
+    console.log(`user ${i} > uuid:  ${client?.uuid}`);
+    if (client?.webSocket.readyState === WebSocket.OPEN) {
+      client?.webSocket.send(
+        JSON.stringify({
+          type: "TRIGGERED_MESSAGE",
+          payload: "Triggered from the REST API",
+          uuid: client?.uuid,
+        })
+      );
+    }
+    i++;
+  });
+
+  res.status(200).send(`Amount of connections: ${clients.size}`);
+});
+
 process.on("SIGINT", () => {
-  console.log("teardown, disconnecting");
+  console.log("teardown, disconnecting ... SIGINT");
+  closeServer(server);
+  require("./setup").teardown(); // eslint-disable-line global-require
+});
+
+process.on("SIGTERM", () => {
+  console.log("teardown, disconnecting ... SIGTERM");
+  closeServer(server);
   require("./setup").teardown(); // eslint-disable-line global-require
 });
