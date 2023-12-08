@@ -98,7 +98,7 @@ router.put("/v1/aiadviser/update-document-group", (0, nocache_1.default)(), (0, 
         }
         console.log("data ", data);
         const result = await document_groups_model_1.documentGroupsModel.findByIdAndUpdate({ _id: data[0]?._id }, {
-            label,
+            label: label === "" ? data[0]?.label : label,
             document_ids: documentIds,
         }, {
             new: true,

@@ -129,7 +129,7 @@ router.put(
       const result = await documentGroupsModel.findByIdAndUpdate(
         { _id: data[0]?._id },
         {
-          label,
+          label: label === "" ? data[0]?.label : label,
           document_ids: documentIds,
         },
         {

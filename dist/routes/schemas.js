@@ -51,7 +51,7 @@ exports.addDocumentSchema = joi_1.default.object({
     original_filename: joi_1.default.string().required(),
     custom_filename: joi_1.default.string().required().allow(""),
     metadata: joi_1.default.object().optional(),
-    document_group_id: joi_1.default.object().optional(),
+    document_group_id: joi_1.default.string().optional().allow(""),
 });
 exports.addDocumentGroupSchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
@@ -120,7 +120,7 @@ exports.UpdateDocumentGroupSchema = joi_1.default.object({
 });
 exports.updateDocGroupSchema = joi_1.default.object({
     document_group_id: joi_1.default.string().required(),
-    label: joi_1.default.string().optional(),
+    label: joi_1.default.string().optional().allow(""),
     documentIds: joi_1.default.array().optional(),
 });
 exports.generateDocxSchema = joi_1.default.object({

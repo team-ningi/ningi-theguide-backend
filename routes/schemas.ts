@@ -52,7 +52,7 @@ export const addDocumentSchema = Joi.object({
   original_filename: Joi.string().required(),
   custom_filename: Joi.string().required().allow(""),
   metadata: Joi.object().optional(),
-  document_group_id: Joi.object().optional(),
+  document_group_id: Joi.string().optional().allow(""),
 });
 
 export const addDocumentGroupSchema = Joi.object({
@@ -131,7 +131,7 @@ export const UpdateDocumentGroupSchema = Joi.object({
 
 export const updateDocGroupSchema = Joi.object({
   document_group_id: Joi.string().required(),
-  label: Joi.string().optional(),
+  label: Joi.string().optional().allow(""),
   documentIds: Joi.array().optional(),
 });
 
