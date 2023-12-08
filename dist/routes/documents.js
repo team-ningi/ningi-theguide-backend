@@ -176,6 +176,38 @@ router.put("/v1/aiadviser/set-embedding-flag", (0, nocache_1.default)(), (0, hel
         });
     }
 });
+router.put("/v1/aiadviser/update_document_group", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+    try {
+        await schemas_1.UpdateDocumentGroupSchema.validateAsync(req.body);
+        const { document_group_id, document_id } = req.body;
+        const data = await document_model_1.documentModel
+            .find({
+            _id: document_id,
+        })
+            .lean()
+            .exec();
+        if (!data) {
+            return res.json({
+                error: true,
+                msg: "No document found for the id",
+            });
+        }
+        const result = await document_model_1.documentModel.findByIdAndUpdate({ _id: data[0]?._id }, {
+            document_group_id,
+        }, {
+            new: true,
+            upsert: false,
+        });
+        res.json(result);
+    }
+    catch (e) {
+        console.log(e);
+        return res.json({
+            error: true,
+            msg: "failed to update document group",
+        });
+    }
+});
 router.post("/v1/aiadviser/add-document", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
         await schemas_1.addDocumentSchema.validateAsync(req.body);
@@ -189,6 +221,7 @@ router.post("/v1/aiadviser/add-document", (0, nocache_1.default)(), (0, helper_1
             custom_filename: req.body.custom_filename,
             additional_context: req.body.additional_context,
             type_of_embedding: req.body.type_of_embedding,
+            document_group_id: req.body.document_group_id || "",
             metadata: req.body.metadata || {},
         };
         const document = await (0, document_creator_1.default)(newContent);

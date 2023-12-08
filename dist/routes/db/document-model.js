@@ -10,6 +10,7 @@ const documentSchema = new mongoose.Schema({
     original_filename: { type: String, index: true },
     saved_filename: { type: String, index: true },
     custom_filename: { type: String, index: true },
+    document_group_id: { type: String, index: true, default: "" },
     type_of_embedding: { type: String, default: "document" },
     image_to_text_content: { type: String, default: "" },
     image_to_text_content_original: { type: String, default: "" },

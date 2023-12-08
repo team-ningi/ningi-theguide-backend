@@ -13,6 +13,7 @@ const cors_1 = __importDefault(require("cors"));
 const compression_1 = __importDefault(require("compression"));
 const users_1 = __importDefault(require("./routes/users"));
 const documents_1 = __importDefault(require("./routes/documents"));
+const documents_groups_1 = __importDefault(require("./routes/documents-groups"));
 const templates_1 = __importDefault(require("./routes/templates"));
 const tags_1 = __importDefault(require("./routes/tags"));
 const reports_1 = __importDefault(require("./routes/reports"));
@@ -37,6 +38,7 @@ app.get("/", (req, res) => {
 });
 app.use(users_1.default);
 app.use(documents_1.default);
+app.use(documents_groups_1.default);
 app.use(templates_1.default);
 app.use(tags_1.default);
 app.use(ai_1.default);

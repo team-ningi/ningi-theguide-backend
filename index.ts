@@ -8,6 +8,7 @@ import cors from "cors";
 import compression from "compression";
 import userRoutes from "./routes/users";
 import documentRoutes from "./routes/documents";
+import documentGroupsRoutes from "./routes/documents-groups";
 import templateRoutes from "./routes/templates";
 import tagsRoutes from "./routes/tags";
 import reportRoutes from "./routes/reports";
@@ -45,6 +46,7 @@ app.get("/", (req, res) => {
 
 app.use(userRoutes);
 app.use(documentRoutes);
+app.use(documentGroupsRoutes);
 app.use(templateRoutes);
 app.use(tagsRoutes);
 app.use(aiRoutes);

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.embedRefinedTextSchema = exports.refineTextSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.getTagsSchema = exports.questionSchema = exports.generateDocxSchema = exports.resetEmbedFlagSchema = exports.updateReportTagsProcessedSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
+exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.embedRefinedTextSchema = exports.refineTextSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.getTagsSchema = exports.questionSchema = exports.generateDocxSchema = exports.updateDocGroupSchema = exports.UpdateDocumentGroupSchema = exports.resetEmbedFlagSchema = exports.updateReportTagsProcessedSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentGroupSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
 exports.uuidSchema = joi_1.default.object({
     uuid: joi_1.default.string().required(),
@@ -50,6 +50,13 @@ exports.addDocumentSchema = joi_1.default.object({
     saved_filename: joi_1.default.string().required(),
     original_filename: joi_1.default.string().required(),
     custom_filename: joi_1.default.string().required().allow(""),
+    metadata: joi_1.default.object().optional(),
+    document_group_id: joi_1.default.object().optional(),
+});
+exports.addDocumentGroupSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    label: joi_1.default.string().required().allow(""),
+    document_ids: joi_1.default.array().required(),
     metadata: joi_1.default.object().optional(),
 });
 exports.addTemplateSchema = joi_1.default.object({
@@ -106,6 +113,15 @@ exports.updateReportTagsProcessedSchema = joi_1.default.object({
 exports.resetEmbedFlagSchema = joi_1.default.object({
     embed_flag: joi_1.default.boolean().required(),
     document_id: joi_1.default.string().required(),
+});
+exports.UpdateDocumentGroupSchema = joi_1.default.object({
+    document_id: joi_1.default.string().required(),
+    document_group_id: joi_1.default.string().required(),
+});
+exports.updateDocGroupSchema = joi_1.default.object({
+    document_group_id: joi_1.default.string().required(),
+    label: joi_1.default.string().optional(),
+    documentIds: joi_1.default.array().optional(),
 });
 exports.generateDocxSchema = joi_1.default.object({
     tags: joi_1.default.object().required(),

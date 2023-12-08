@@ -52,6 +52,14 @@ export const addDocumentSchema = Joi.object({
   original_filename: Joi.string().required(),
   custom_filename: Joi.string().required().allow(""),
   metadata: Joi.object().optional(),
+  document_group_id: Joi.object().optional(),
+});
+
+export const addDocumentGroupSchema = Joi.object({
+  user_id: Joi.string().required(),
+  label: Joi.string().required().allow(""),
+  document_ids: Joi.array().required(),
+  metadata: Joi.object().optional(),
 });
 
 export const addTemplateSchema = Joi.object({
@@ -114,6 +122,17 @@ export const updateReportTagsProcessedSchema = Joi.object({
 export const resetEmbedFlagSchema = Joi.object({
   embed_flag: Joi.boolean().required(),
   document_id: Joi.string().required(),
+});
+
+export const UpdateDocumentGroupSchema = Joi.object({
+  document_id: Joi.string().required(),
+  document_group_id: Joi.string().required(),
+});
+
+export const updateDocGroupSchema = Joi.object({
+  document_group_id: Joi.string().required(),
+  label: Joi.string().optional(),
+  documentIds: Joi.array().optional(),
 });
 
 export const generateDocxSchema = Joi.object({

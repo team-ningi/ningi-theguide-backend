@@ -8,6 +8,7 @@ import {
   idSchema,
   getDocsSchema,
   resetEmbedFlagSchema,
+  UpdateDocumentGroupSchema,
   addDocumentSchema,
   searchDocsSchema,
   returnPresignedURLSchema,
@@ -223,6 +224,51 @@ router.put(
   }
 );
 
+router.put(
+  "/v1/aiadviser/update_document_group",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await UpdateDocumentGroupSchema.validateAsync(req.body);
+
+      const { document_group_id, document_id } = req.body;
+
+      const data = await documentModel
+        .find({
+          _id: document_id,
+        })
+        .lean()
+        .exec();
+
+      if (!data) {
+        return res.json({
+          error: true,
+          msg: "No document found for the id",
+        });
+      }
+
+      const result = await documentModel.findByIdAndUpdate(
+        { _id: data[0]?._id },
+        {
+          document_group_id,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+      res.json(result);
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to update document group",
+      });
+    }
+  }
+);
+
 router.post(
   "/v1/aiadviser/add-document",
   nocache(),
@@ -241,6 +287,7 @@ router.post(
         custom_filename: req.body.custom_filename,
         additional_context: req.body.additional_context,
         type_of_embedding: req.body.type_of_embedding,
+        document_group_id: req.body.document_group_id || "",
         metadata: req.body.metadata || {},
       };
 
