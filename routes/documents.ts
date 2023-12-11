@@ -225,7 +225,7 @@ router.put(
 );
 
 router.put(
-  "/v1/aiadviser/update_document_group",
+  "/v1/aiadviser/update_document_group_id",
   nocache(),
   AuthenticateManageToken(),
   async (req, res) => {

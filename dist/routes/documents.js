@@ -176,7 +176,7 @@ router.put("/v1/aiadviser/set-embedding-flag", (0, nocache_1.default)(), (0, hel
         });
     }
 });
-router.put("/v1/aiadviser/update_document_group", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+router.put("/v1/aiadviser/update_document_group_id", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
         await schemas_1.UpdateDocumentGroupSchema.validateAsync(req.body);
         const { document_group_id, document_id } = req.body;
