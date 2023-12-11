@@ -3,9 +3,11 @@ import { Router } from "express";
 import nocache from "nocache";
 import { usersModel } from "./db/users-model";
 import { documentModel } from "./db/document-model";
+import { documentGroupsModel } from "./db/document-groups-model";
 import { templateModel } from "./db/template-model";
 import { tagsModel } from "./db/tags-model";
 import { reportsModel } from "./db/reports-model";
+import { chatHistoryModel } from "./db/chat-history-model";
 import usersCreator from "./db/users-creator";
 
 const router = Router();
@@ -67,6 +69,14 @@ router.post("/v1/admin/teardown", nocache(), async (req, res) => {
     console.log("teardown started");
 
     await documentModel.deleteMany({
+      user_id: userID,
+    });
+
+    await documentGroupsModel.deleteMany({
+      user_id: userID,
+    });
+
+    await chatHistoryModel.deleteMany({
       user_id: userID,
     });
 

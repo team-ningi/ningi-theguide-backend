@@ -8,9 +8,11 @@ const express_1 = require("express");
 const nocache_1 = __importDefault(require("nocache"));
 const users_model_1 = require("./db/users-model");
 const document_model_1 = require("./db/document-model");
+const document_groups_model_1 = require("./db/document-groups-model");
 const template_model_1 = require("./db/template-model");
 const tags_model_1 = require("./db/tags-model");
 const reports_model_1 = require("./db/reports-model");
+const chat_history_model_1 = require("./db/chat-history-model");
 const users_creator_1 = __importDefault(require("./db/users-creator"));
 const router = (0, express_1.Router)();
 const userID = "test";
@@ -60,6 +62,12 @@ router.post("/v1/admin/teardown", (0, nocache_1.default)(), async (req, res) => 
     try {
         console.log("teardown started");
         await document_model_1.documentModel.deleteMany({
+            user_id: userID,
+        });
+        await document_groups_model_1.documentGroupsModel.deleteMany({
+            user_id: userID,
+        });
+        await chat_history_model_1.chatHistoryModel.deleteMany({
             user_id: userID,
         });
         await template_model_1.templateModel.deleteMany({
