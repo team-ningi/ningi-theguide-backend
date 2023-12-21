@@ -17,7 +17,6 @@ const createEmbeddings_1 = __importDefault(require("../ai/createEmbeddings"));
 const createIndex_1 = __importDefault(require("../ai/pinecone/createIndex"));
 const queryPinecone_1 = require("../ai/pinecone/queryPinecone");
 const docx_1 = __importDefault(require("../ai/doc-generation/docx"));
-const uuid_1 = require("uuid");
 const extract_text_1 = __importDefault(require("../ai/image-to-text/extract-text"));
 const refine_text_1 = __importDefault(require("../ai/image-to-text/refine-text"));
 const embed_text_1 = __importDefault(require("../ai/image-to-text/embed-text"));
@@ -89,85 +88,126 @@ router.post("/v1/aiadviser/query", (0, nocache_1.default)(), (0, helper_1.Authen
         }));
     }
 });
-router.post("/v1/aiadviser/query-get-tags", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
+/* ROUTE NOT IN USE
+router.post(
+  "/v1/aiadviser/query-get-tags",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
     // THIS IS NOT IN USE ... IN FAVOR OF /query-get-tags-single-chunk
     try {
-        await schemas_1.getTagsSchema.validateAsync(req.body);
-        const { tags, documentIds, additionalPrompt, reportId } = req.body;
-        const client = new pinecone_1.Pinecone({
-            apiKey: process.env.PINECONE_API_KEY,
-            environment: process.env.PINECONE_ENVIRONMENT,
-        });
-        let filterQuery = {};
-        if (documentIds?.length) {
-            filterQuery = {
-                document_id: {
-                    $in: [...documentIds],
-                },
-            };
-        }
-        const prePrompt = "I want to find out some information, everything i wish to know is inside of this Array of objects ,the value in each item is an individial query.";
-        const postPrompt = `Return the data as an object of { 'key': 'value'}, if you dont know an answer for any individual item  
-        please keep the structure of { 'key':'value' } but return the value be an empty string , do not explain to me that you could not answer becuase of lack of context just reply with '' for each individual value you can not answer. 
-        If however, you do know the answer please replace the value with the correct data. Keep context, 
-        dont return anything you are unsure of. Return only the specified JSON object of { 'key': 'value' }. 
-        Respond ONLY with a Valid JSON object, do not respond with text such as 'I Dont Know' or 'Im sorry' , 
-        Respond ONLY with a JSON object with all of the keys present and NO additional text. 
-        If you do not have the answer for a paticular query return an empty string for the value. If you do know the answer put the data in the place of value. 
-        If the provided context does not include the information required to answer a query, then simply return '' as the value. 
+      await getTagsSchema.validateAsync(req.body);
+      const { tags, documentIds, additionalPrompt, reportId } = req.body;
+
+      const client = new Pinecone({
+        apiKey: process.env.PINECONE_API_KEY,
+        environment: process.env.PINECONE_ENVIRONMENT,
+      });
+
+      let filterQuery = {};
+      if (documentIds?.length) {
+        filterQuery = {
+          document_id: {
+            $in: [...documentIds],
+          },
+        };
+      }
+
+      const prePrompt =
+        "I want to find out some information, everything i wish to know is inside of this Array of objects ,the value in each item is an individial query.";
+
+      const postPrompt = `Return the data as an object of { 'key': 'value'}, if you dont know an answer for any individual item
+        please keep the structure of { 'key':'value' } but return the value be an empty string , do not explain to me that you could not answer becuase of lack of context just reply with '' for each individual value you can not answer.
+        If however, you do know the answer please replace the value with the correct data. Keep context,
+        dont return anything you are unsure of. Return only the specified JSON object of { 'key': 'value' }.
+        Respond ONLY with a Valid JSON object, do not respond with text such as 'I Dont Know' or 'Im sorry' ,
+        Respond ONLY with a JSON object with all of the keys present and NO additional text.
+        If you do not have the answer for a paticular query return an empty string for the value. If you do know the answer put the data in the place of value.
+        If the provided context does not include the information required to answer a query, then simply return '' as the value.
         If the details needed to answer a query is not provided, just return an empty string for that query, If you cant not answer any of the queries then just return the JSON object with all of the keys but with empty strings as the values.
-        To reiterate i only want the valid JSON object returned, i do not want any additional text explaining why the values are empty strings, 
+        To reiterate i only want the valid JSON object returned, i do not want any additional text explaining why the values are empty strings,
         ONLY return the valid json object, `;
-        let tagResults = {};
-        const chunkArrayInGroups = (arr, size) => {
-            let results = [];
-            while (arr.length) {
-                results.push(arr.splice(0, size));
-            }
-            return results;
-        };
-        const processChunk = async (batch) => {
-            const batchStrings = batch.map((obj) => JSON.stringify(obj));
-            const theQuery = `${additionalPrompt} ${prePrompt} ${batchStrings} ${postPrompt}`;
-            // console.log(theQuery);
-            const answers = await (0, queryPinecone_1.queryPineconeVectorStoreAndQueryLLM)(client, process.env.PINECONE_INDEX_NAME, theQuery, filterQuery, "tags");
-            return answers;
-        };
-        const processAllChunks = async (batches) => {
-            for (const batch of batches) {
-                const answers = await processChunk(batch);
-                tagResults = { ...tagResults, ...answers };
-                await new Promise((resolve) => setTimeout(resolve, 1200));
-            }
-            console.log("All batches processed!");
-        };
-        const chunks = chunkArrayInGroups(tags, 15);
-        console.log(chunks.length);
-        await processAllChunks(chunks);
-        if (Object.keys(tagResults).length < tags.length) {
-            console.log(` Did not generate all tags, tags expected: ${tags.length} , tags generated : ${Object.keys(tagResults).length} `);
+
+      let tagResults = {};
+
+      const chunkArrayInGroups = (arr, size) => {
+        let results = [];
+        while (arr.length) {
+          results.push(arr.splice(0, size));
         }
-        console.log("Finished Poulating Tags");
-        const result = await reports_model_1.reportsModel.findOneAndUpdate({ _id: reportId }, {
-            tagResults,
-        }, {
-            new: true,
-            upsert: false,
-        });
-        const outputName = `${(0, uuid_1.v4)()}.${result?.file_type}`;
-        await (0, docx_1.default)(tagResults, reportId, result.base_template_url, outputName);
-        return res.json({
-            message: "finished tags & prompts & generated the report",
-        });
+        return results;
+      };
+
+      const processChunk = async (batch) => {
+        const batchStrings = batch.map((obj) => JSON.stringify(obj));
+        const theQuery = `${additionalPrompt} ${prePrompt} ${batchStrings} ${postPrompt}`;
+        // console.log(theQuery);
+        const answers = await queryPineconeVectorStoreAndQueryLLM(
+          client,
+          process.env.PINECONE_INDEX_NAME,
+          theQuery,
+          filterQuery,
+          "tags"
+        );
+
+        return answers;
+      };
+
+      const processAllChunks = async (batches) => {
+        for (const batch of batches) {
+          const answers = await processChunk(batch);
+          tagResults = { ...tagResults, ...answers };
+          await new Promise((resolve) => setTimeout(resolve, 1200));
+        }
+        console.log("All batches processed!");
+      };
+
+      const chunks = chunkArrayInGroups(tags, 15);
+      console.log(chunks.length);
+
+      await processAllChunks(chunks);
+
+      if (Object.keys(tagResults).length < tags.length) {
+        console.log(
+          ` Did not generate all tags, tags expected: ${
+            tags.length
+          } , tags generated : ${Object.keys(tagResults).length} `
+        );
+      }
+
+      console.log("Finished Poulating Tags");
+      const result = await reportsModel.findOneAndUpdate(
+        { _id: reportId },
+        {
+          tagResults,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+
+      const outputName = `${uuidv4()}.${result?.file_type}`;
+      await GenerateDocx(
+        tagResults,
+        reportId,
+        result.base_template_url,
+        outputName
+      );
+
+      return res.json({
+        message: "finished tags & prompts & generated the report",
+      });
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to query data",
+      });
     }
-    catch (e) {
-        console.log(e);
-        return res.json({
-            error: true,
-            msg: "failed to query data",
-        });
-    }
-});
+  }
+);
+*/
 router.post("/v1/aiadviser/query-get-tags-single-chunk", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     res.writeHead(200, {
         "Content-Type": "text/plain",
@@ -424,8 +464,14 @@ router.post("/v1/aiadviser/create-index", (0, nocache_1.default)(), (0, helper_1
 router.post("/v1/aiadviser/docx-generation", (0, nocache_1.default)(), (0, helper_1.AuthenticateManageToken)(), async (req, res) => {
     try {
         await schemas_1.generateDocxSchema.validateAsync(req.body);
-        const { tags, reportId, templateURL, outputName } = req.body;
-        await (0, docx_1.default)(tags, reportId, templateURL, outputName);
+        /* example template definition
+          {
+            section_SECTION_NAME_1: true ,
+            section_SECTION_NAME_2: false,
+          }
+        */
+        const { tags, reportId, templateURL, outputName, templateDefinition } = req.body;
+        await (0, docx_1.default)(tags, reportId, templateURL, outputName, templateDefinition);
         return res.json({
             msg: "doc generated",
         });

@@ -143,6 +143,7 @@ router.post("/v1/aiadviser/add-report", (0, nocache_1.default)(), (0, helper_1.A
             file_type: req.body.file_type,
             tags: req.body.tags,
             tag_chunks_to_process: req.body.tag_chunks_to_process,
+            template_definition: req.body.template_definition || {},
             tag_chunks_processed: req.body.tag_chunks_processed,
             tagResults: req.body.tagResults,
             base_template_url: req.body.base_template_url,

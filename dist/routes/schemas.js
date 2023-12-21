@@ -88,6 +88,7 @@ exports.addReportSchema = joi_1.default.object({
     report_type: joi_1.default.string().required(),
     file_type: joi_1.default.string().required(),
     tags: joi_1.default.array().required(),
+    template_definition: joi_1.default.object().required(),
     tag_chunks_to_process: joi_1.default.array().required(),
     tag_chunks_processed: joi_1.default.array().required(),
     tagResults: joi_1.default.object().required(),
@@ -124,6 +125,7 @@ exports.updateDocGroupSchema = joi_1.default.object({
     documentIds: joi_1.default.array().optional(),
 });
 exports.generateDocxSchema = joi_1.default.object({
+    templateDefinition: joi_1.default.object().required(),
     tags: joi_1.default.object().required(),
     reportId: joi_1.default.string().required(),
     templateURL: joi_1.default.string().required(),

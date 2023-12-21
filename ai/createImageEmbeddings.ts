@@ -27,6 +27,7 @@ const textract = new TextractClient({
   region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
 
+// NOT IN USE
 // THE ORIGINAL CALL FOR IMAGE->TEXT
 // TAKES TOO LONG ON AN ACTUAL SERVER
 // so split into 3 calls > extract | refine | embed

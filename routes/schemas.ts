@@ -94,6 +94,7 @@ export const addReportSchema = Joi.object({
   report_type: Joi.string().required(),
   file_type: Joi.string().required(),
   tags: Joi.array().required(),
+  template_definition: Joi.object().required(),
   tag_chunks_to_process: Joi.array().required(),
   tag_chunks_processed: Joi.array().required(),
   tagResults: Joi.object().required(),
@@ -136,6 +137,7 @@ export const updateDocGroupSchema = Joi.object({
 });
 
 export const generateDocxSchema = Joi.object({
+  templateDefinition: Joi.object().required(),
   tags: Joi.object().required(),
   reportId: Joi.string().required(),
   templateURL: Joi.string().required(),

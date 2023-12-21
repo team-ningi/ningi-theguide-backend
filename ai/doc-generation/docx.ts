@@ -20,10 +20,12 @@ export default async (
   tags: any,
   reportId: string,
   templateURL: string,
-  outputName: string
+  outputName: string,
+  templateDefinition: any
 ) => {
   let content;
   const useLocalFile = false;
+  const tagsAndDefinitions = { ...tags, ...templateDefinition };
 
   if (useLocalFile) {
     // Load the docx file as binary content
@@ -61,7 +63,7 @@ export default async (
     paragraphLoop: true,
     linebreaks: true,
   });
-  doc.render(tags);
+  doc.render(tagsAndDefinitions);
 
   const buf = doc.getZip().generate({
     type: "nodebuffer",
@@ -89,6 +91,7 @@ export default async (
         { _id: reportId },
         {
           generated_report_url: `${outputName}`,
+          template_definition: templateDefinition,
           generated_report: true,
           status: "complete",
         },

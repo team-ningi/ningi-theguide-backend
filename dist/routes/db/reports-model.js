@@ -14,6 +14,7 @@ const reportsSchema = new mongoose.Schema({
     tags: { type: Array },
     tag_chunks_to_process: { type: Array },
     tag_chunks_processed: { type: Array },
+    template_definition: { type: mongoose.SchemaTypes.Mixed, default: {} },
     tagResults: { type: mongoose.SchemaTypes.Mixed, default: {} },
     tagResultsOriginal: { type: mongoose.SchemaTypes.Mixed, default: {} },
     report_hidden: { type: Boolean, default: false },

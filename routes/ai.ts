@@ -129,6 +129,7 @@ router.post(
   }
 );
 
+/* ROUTE NOT IN USE
 router.post(
   "/v1/aiadviser/query-get-tags",
   nocache(),
@@ -247,6 +248,7 @@ router.post(
     }
   }
 );
+*/
 
 router.post(
   "/v1/aiadviser/query-get-tags-single-chunk",
@@ -630,8 +632,21 @@ router.post(
   async (req, res) => {
     try {
       await generateDocxSchema.validateAsync(req.body);
-      const { tags, reportId, templateURL, outputName } = req.body;
-      await GenerateDocx(tags, reportId, templateURL, outputName);
+      /* example template definition
+        {
+          section_SECTION_NAME_1: true ,
+          section_SECTION_NAME_2: false,
+        }
+      */
+      const { tags, reportId, templateURL, outputName, templateDefinition } =
+        req.body;
+      await GenerateDocx(
+        tags,
+        reportId,
+        templateURL,
+        outputName,
+        templateDefinition
+      );
 
       return res.json({
         msg: "doc generated",

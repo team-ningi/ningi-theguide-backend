@@ -15,9 +15,10 @@ const s3Client = new S3Client({
     },
     region: process.env.NEXT_PUBLIC_AWS_KEY_REGION,
 });
-exports.default = async (tags, reportId, templateURL, outputName) => {
+exports.default = async (tags, reportId, templateURL, outputName, templateDefinition) => {
     let content;
     const useLocalFile = false;
+    const tagsAndDefinitions = { ...tags, ...templateDefinition };
     if (useLocalFile) {
         // Load the docx file as binary content
         content = fs.readFileSync(path.resolve(__dirname, "suitabilityReportTemplate.docx"), "binary");
@@ -46,7 +47,7 @@ exports.default = async (tags, reportId, templateURL, outputName) => {
         paragraphLoop: true,
         linebreaks: true,
     });
-    doc.render(tags);
+    doc.render(tagsAndDefinitions);
     const buf = doc.getZip().generate({
         type: "nodebuffer",
         compression: "DEFLATE",
@@ -67,6 +68,7 @@ exports.default = async (tags, reportId, templateURL, outputName) => {
             await s3Client.send(command);
             await reports_model_1.reportsModel.findOneAndUpdate({ _id: reportId }, {
                 generated_report_url: `${outputName}`,
+                template_definition: templateDefinition,
                 generated_report: true,
                 status: "complete",
             }, {
