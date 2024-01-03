@@ -221,6 +221,7 @@ describe("API routes", () => {
         report_name: "test report",
         report_type: "standard",
         file_type: "docx",
+        template_definition: {},
         initial_prompt: "test initial prompt",
         tags: [
           {

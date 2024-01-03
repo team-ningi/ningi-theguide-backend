@@ -10,6 +10,7 @@ import {
   addReportSchema,
   searchReportsSchema,
   updateReportSchema,
+  updateReportTagsDefinitionsSchema,
   updateReportTagsProcessedSchema,
 } from "./schemas";
 
@@ -332,6 +333,67 @@ router.put(
       return res.json({
         error: true,
         msg: "failed to update report",
+      });
+    }
+  }
+);
+
+router.put(
+  "/v1/aiadviser/update-report-tags-and-definitions",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await updateReportTagsDefinitionsSchema.validateAsync(req.body);
+
+      const { user_id, report_id, template_definition, tagResults } = req.body;
+
+      const report = await reportsModel
+        .find({
+          _id: report_id,
+        })
+        .lean()
+        .exec();
+
+      if (!report) {
+        return res.json({
+          error: true,
+          msg: "No report found",
+        });
+      }
+
+      const result = await reportsModel.findOneAndUpdate(
+        { _id: report_id },
+        {
+          template_definition:
+            template_definition || report[0]?.template_definition,
+          tagResults: tagResults || report[0]?.tagResults,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+
+      const auditData = {
+        user_id: user_id || report[0]?.user_id,
+        action: "update_report_tags_and_definitions",
+        metadata: {
+          user_id: user_id || report[0]?.user_id,
+          report_id: report_id,
+          template_definition:
+            template_definition || report[0]?.template_definition,
+          tagResults: tagResults || report[0]?.tagResults,
+        },
+      };
+      await addToAudit(req, auditData);
+
+      res.json(result);
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to update report tags and definitions",
       });
     }
   }

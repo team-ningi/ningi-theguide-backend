@@ -113,6 +113,13 @@ export const updateReportSchema = Joi.object({
   generated_report: Joi.boolean().required(),
 });
 
+export const updateReportTagsDefinitionsSchema = Joi.object({
+  user_id: Joi.string().required(),
+  report_id: Joi.string().required(),
+  template_definition: Joi.object().required(),
+  tagResults: Joi.object().required(),
+});
+
 export const updateReportTagsProcessedSchema = Joi.object({
   user_id: Joi.string().required(),
   report_id: Joi.string().required(),

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.embedRefinedTextSchema = exports.refineTextSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.getTagsSchema = exports.questionSchema = exports.generateDocxSchema = exports.updateDocGroupSchema = exports.UpdateDocumentGroupSchema = exports.resetEmbedFlagSchema = exports.updateReportTagsProcessedSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentGroupSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
+exports.returnPresignedURLSchema = exports.updateHistorySchema = exports.updateUserSchema = exports.emailAddressSchema = exports.emailSchema = exports.embedRefinedTextSchema = exports.refineTextSchema = exports.createEmbeddingsSchema = exports.createIndexSchema = exports.getReportsSchema = exports.getDocsSchema = exports.userIdSchema = exports.idSchema = exports.getTagsSchema = exports.questionSchema = exports.generateDocxSchema = exports.updateDocGroupSchema = exports.UpdateDocumentGroupSchema = exports.resetEmbedFlagSchema = exports.updateReportTagsProcessedSchema = exports.updateReportTagsDefinitionsSchema = exports.updateReportSchema = exports.addReportSchema = exports.updateTagsSchema = exports.addTagsSchema = exports.addTemplateSchema = exports.addDocumentGroupSchema = exports.addDocumentSchema = exports.addHistorySchema = exports.searchReportsSchema = exports.searchTemplatesSchema = exports.searchDocsSchema = exports.uuidAndEmailSchema = exports.uuidSchema = void 0;
 const joi_1 = __importDefault(require("joi"));
 exports.uuidSchema = joi_1.default.object({
     uuid: joi_1.default.string().required(),
@@ -104,6 +104,12 @@ exports.updateReportSchema = joi_1.default.object({
     report_id: joi_1.default.string().required(),
     generated_report_url: joi_1.default.string().required(),
     generated_report: joi_1.default.boolean().required(),
+});
+exports.updateReportTagsDefinitionsSchema = joi_1.default.object({
+    user_id: joi_1.default.string().required(),
+    report_id: joi_1.default.string().required(),
+    template_definition: joi_1.default.object().required(),
+    tagResults: joi_1.default.object().required(),
 });
 exports.updateReportTagsProcessedSchema = joi_1.default.object({
     user_id: joi_1.default.string().required(),
