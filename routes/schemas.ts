@@ -120,6 +120,12 @@ export const updateReportTagsDefinitionsSchema = Joi.object({
   tagResults: Joi.object().required(),
 });
 
+export const updateReportOriginalTagsSchema = Joi.object({
+  user_id: Joi.string().required(),
+  report_id: Joi.string().required(),
+  tagResults: Joi.object().required(),
+});
+
 export const updateReportTagsProcessedSchema = Joi.object({
   user_id: Joi.string().required(),
   report_id: Joi.string().required(),

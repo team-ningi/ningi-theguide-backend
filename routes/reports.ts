@@ -11,6 +11,7 @@ import {
   searchReportsSchema,
   updateReportSchema,
   updateReportTagsDefinitionsSchema,
+  updateReportOriginalTagsSchema,
   updateReportTagsProcessedSchema,
 } from "./schemas";
 
@@ -389,6 +390,66 @@ router.put(
       await addToAudit(req, auditData);
 
       res.json(result);
+    } catch (e) {
+      console.log(e);
+      return res.json({
+        error: true,
+        msg: "failed to update report tags and definitions",
+      });
+    }
+  }
+);
+
+router.put(
+  "/v1/aiadviser/set-original-tag-results",
+  nocache(),
+  AuthenticateManageToken(),
+  async (req, res) => {
+    try {
+      await updateReportOriginalTagsSchema.validateAsync(req.body);
+
+      const { user_id, report_id, tagResults } = req.body;
+
+      const report = await reportsModel
+        .find({
+          _id: report_id,
+        })
+        .lean()
+        .exec();
+
+      if (!report) {
+        return res.json({
+          error: true,
+          msg: "No report found",
+        });
+      }
+
+      const result = await reportsModel.findOneAndUpdate(
+        { _id: report_id },
+        {
+          tagResultsOriginal: tagResults || report[0]?.tagResults,
+        },
+        {
+          new: true,
+          upsert: false,
+        }
+      );
+
+      const auditData = {
+        user_id: user_id || report[0]?.user_id,
+        action: "update_report_original_tags",
+        metadata: {
+          user_id: user_id || report[0]?.user_id,
+          report_id: report_id,
+          tagResultsOriginal: tagResults || report[0]?.tagResults,
+        },
+      };
+      await addToAudit(req, auditData);
+
+      res.json({
+        error: false,
+        msg: "set original tags",
+      });
     } catch (e) {
       console.log(e);
       return res.json({

@@ -88,6 +88,6 @@ export const queryPineconeVectorStoreAndQueryLLM = async (
       }
     }
   } else {
-    return "No results found.";
+    return {};
   }
 };

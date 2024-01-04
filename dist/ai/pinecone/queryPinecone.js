@@ -70,7 +70,7 @@ const queryPineconeVectorStoreAndQueryLLM = async (client, indexName, question, 
         }
     }
     else {
-        return "No results found.";
+        return {};
     }
 };
 exports.queryPineconeVectorStoreAndQueryLLM = queryPineconeVectorStoreAndQueryLLM;
